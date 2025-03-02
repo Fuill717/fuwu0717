@@ -29,25 +29,26 @@
           @click="selectCell(rowIndex, colIndex)"
           @contextmenu.prevent="deleteCourse(rowIndex, colIndex)"
         >
-          {{ cell.course || '空闲' }} <!-- 显示课程名称或“空闲” -->
+          {{ cell.class_name || '空闲' }} <!-- 显示课程名称或“空闲” -->
         </div>
       </div>
     </div>
 
-    <div class="course-selector">
-      <input type="text" placeholder="搜索课程" v-model="searchCourse" @keyup="filterCourses" />
-      <ul>
-        <li v-for="(course, index) in filteredCourses" :key="index">
-          <span>{{ course.name }}</span> <!-- 显示课程名称 -->
-          <button @click="addCourse(course)">添加课程</button>
-        </li>
-      </ul>
-    </div>
+<!--    <div class="course-selector">-->
+<!--      <input type="text" placeholder="搜索课程" v-model="searchCourse" @keyup="filterCourses" />-->
+<!--      <ul>-->
+<!--        <li v-for="(course, index) in tempCourses" :key="index">-->
+<!--          <span>{{ course.class_name }}</span> &lt;!&ndash; 显示课程名称 &ndash;&gt;-->
+<!--          <button @click="addCourse(course)">添加课程</button>-->
+<!--        </li>-->
+<!--      </ul>-->
+<!--    </div>-->
 
     <div class="temp-course-area">
       <h4>课程暂放区</h4>
       <ul>
         <li v-for="(course, index) in tempCourses" :key="index">
+          <span>{{ course.class_name }}</span> <!-- 显示课程名称 -->
           <button @click="restoreCourse(index)">恢复课程</button>
           {{ course.name }}
         </li>
@@ -67,12 +68,21 @@
 <script>
 import axios from "axios"; // 引入 Axios 进行 HTTP 请求
 
+const API_BASE_URL = 'http://127.0.0.1:12350/api'; // 替换为实际的后端地址
+
 export default {
   data() {
     return {
-      schedule: [], // 初始化为空数组，从后端加载数据
+      timeSlots: [], // 初始化为空数组，从后端加载数据
+      schedule: [
+        { time: '1节', cells: Array(7).fill({}) },
+        { time: '2节', cells: Array(7).fill({}) },
+        { time: '3节', cells: Array(7).fill({}) },
+        { time: '4节', cells: Array(7).fill({}) },
+      ],
       viewMode: "classroom",
-      daysOfWeek: ["周一", "周二", "周三", "周四", "周五"],
+      daysOfWeek: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+      daysOfWeek_En: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       searchCourse: "",
       courses: [], // 从后端加载课程列表
       filteredCourses: [],
@@ -87,16 +97,52 @@ export default {
   methods: {
     async loadScheduleFromBackend() {
       try {
-        const response = await axios.get("/api/schedule");
-        this.schedule = response.data; // 更新课表数据
+        const query = {
+          "type" : "classroom",
+          "name" : "HXGC2#201-化工分析实验室（一）"
+        };
+        const response = await axios.post(`${API_BASE_URL}/schedule`, query,{
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+          }
+        });
+        this.timeSlots = response.data.data.schedule; // 更新课表数据
+        // 将courses过滤timeSlots已排的课程
+        this.tempCourses = this.courses.filter((course) =>
+            !this.timeSlots.some((item) => item.class_id === course.class_id)
+        );
+
+        // 将timeSlots放入schedule中
+        this.fillSchedule()
       } catch (error) {
         console.error("加载课表失败:", error);
         alert("加载课表失败，请稍后再试");
       }
     },
+    fillSchedule() {
+      // 初始化 schedule 中的每一天
+
+      // 填充每个时间段的课程数据
+      this.timeSlots.forEach((item) => {
+        const dayIndex = this.daysOfWeek_En.indexOf(item.day_of_week);  // 获取星期几对应的索引
+        if (dayIndex !== -1) {
+          // 填充对应的课程
+          console.log("你好");
+          console.log(item.class_name);
+          this.schedule[item.period - 1].cells[dayIndex] = {
+            class_name: item.class_name,
+            teacher_name: item.teacher_name,
+            day_of_week: item.day_of_week,
+            class_room: item.class_room,
+            is_available: item.is_available,
+            selected: false
+          };
+        }
+      });
+    },
     async saveScheduleToBackend() {
       try {
-        await axios.post("/api/schedule/save", { schedule: this.schedule });
+        await axios.post(`${API_BASE_URL}/schedule/save`, { schedule: this.schedule });
       } catch (error) {
         console.error("保存课表失败:", error);
         alert("保存课表失败，请稍后再试");
@@ -104,22 +150,32 @@ export default {
     },
     async loadCoursesFromBackend() {
       try {
-        const response = await axios.get("/api/courses");
-        this.courses = response.data; // 更新课程列表
-        this.filteredCourses = [...this.courses];
+        const response = await axios.get(`${API_BASE_URL}/courses`, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+          }
+        });
+        this.courses = response.data.data.courses; // 更新课程列表
+        this.tempCourses = [...this.courses];
       } catch (error) {
         console.error("加载课程失败:", error);
         alert("加载课程失败，请稍后再试");
       }
     },
-    autoSchedule() {
-      // 示例：随机填充课表
-      this.schedule.forEach((row) => {
-        row.cells = row.cells.map(() => ({
-          course: this.courses[Math.floor(Math.random() * this.courses.length)]?.name || null,
-        }));
-      });
-      this.saveScheduleToBackend(); // 自动排课后保存到后端
+    async autoSchedule() {
+      // 自动排课
+      try {
+        await axios.post(`${API_BASE_URL}/automated_scheduling`, null,{
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+          }
+        });
+        this.loadScheduleFromBackend(); // 自动排课后重新加载课表数据
+      } catch (error) {
+        console.error("自动排课失败:", error);
+        alert("自动排课失败，请稍后再试");
+      }
+      // this.saveScheduleToBackend(); // 自动排课后保存到后端
     },
     checkSchedule() {
       const conflicts = [];
@@ -149,7 +205,7 @@ export default {
       this.schedule.forEach((row) => {
         const rowData = [row.time];
         row.cells.forEach((cell) => {
-          rowData.push(cell.course || "空闲");
+          rowData.push(cell.class_name || "空闲");
         });
         tableData.push(rowData);
       });
@@ -158,34 +214,34 @@ export default {
       console.log("导出数据:", tableData);
     },
     deleteCourse(rowIndex, colIndex) {
-      const removedCourse = this.schedule[rowIndex].cells[colIndex].course;
+      const removedCourse = this.schedule[rowIndex].cells[colIndex];
+      console.log(rowIndex);
+      console.log(colIndex);
+      console.log("删除课程:", removedCourse);
       if (removedCourse) {
         // 将课程对象及其位置信息添加到暂放区
-        this.tempCourses.push({
-          name: removedCourse,
-          rowIndex: rowIndex,
-          colIndex: colIndex,
-        });
+        this.tempCourses.push(removedCourse);
       }
       // 清空课表单元格
       this.schedule[rowIndex].cells[colIndex] = {};
-      this.saveScheduleToBackend(); // 删除课程后保存到后端
+      console.log(this.schedule);
+      // this.saveScheduleToBackend(); // 删除课程后保存到后端
     },
     restoreCourse(index) {
       const restoredCourse = this.tempCourses.splice(index, 1)[0]; // 移除暂放区的课程
       if (restoredCourse) {
-        const { rowIndex, colIndex, name } = restoredCourse;
+        const [rowIndex, colIndex] = this.selectedCell;
 
-        // 恢复课程到原位
-        this.schedule[rowIndex].cells[colIndex] = { course: name };
+        // 恢复课程到选中位置
+        this.schedule[rowIndex].cells[colIndex] = restoredCourse;
 
-        alert(`已恢复课程：${name}`);
-        this.saveScheduleToBackend(); // 恢复课程后保存到后端
+        // this.saveScheduleToBackend(); // 恢复课程后保存到后端
       }
     },
     selectCell(rowIndex, colIndex) {
       const cell = this.schedule[rowIndex].cells[colIndex];
-      if (!cell.course) {
+      console.log("选中单元格:", cell);
+      if (!cell || !cell.class_name) {
         this.selectedCell = [rowIndex, colIndex]; // 记录选中的单元格位置
         cell.selected = true; // 设置选中状态
       } else {
@@ -214,7 +270,7 @@ export default {
       this.saveScheduleToBackend(); // 添加课程后保存到后端
     },
     filterCourses() {
-      this.filteredCourses = this.courses.filter((course) =>
+      this.tempCourses = this.courses.filter((course) =>
         course.name.toLowerCase().includes(this.searchCourse.toLowerCase())
       );
     },
@@ -249,7 +305,7 @@ export default {
 .header,
 .row {
   display: grid;
-  grid-template-columns: 150px repeat(5, 1fr); /* 第一列固定宽度，其余列均分 */
+  grid-template-columns: 150px repeat(7, 1fr); /* 第一列固定宽度，其余列均分 */
   align-items: center;
 }
 
