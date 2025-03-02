@@ -3,7 +3,7 @@
     <!-- 教室数据导入 -->
     <div class="classroom-import">
       <h3>教室数据导入</h3>
-      <button @click="openFilePicker('classroom')">导入</button>
+      <button @click="openFilePicker('classrooms')">导入</button>
       <div v-if="classroomImported" class="import-status">
         已导入，点击重新导入
       </div>
@@ -12,7 +12,7 @@
     <!-- 排课任务导入 -->
     <div class="scheduling-task-import">
       <h3>排课任务导入</h3>
-      <button @click="openFilePicker('scheduling')">导入</button>
+      <button @click="openFilePicker('courses')">导入</button>
       <div v-if="schedulingTaskImported" class="import-status">
         已导入，点击重新导入
       </div>
@@ -46,25 +46,35 @@ const startDate = ref(null); // 开始时间
 const endDate = ref(null); // 结束时间
 const isStartCalendarVisible = ref(false); // 控制开始时间日历的显示
 const weeks = ref([]); // 每周的时间段
+const userId = 1; // 用户 ID
+const API_BASE_URL = 'http://127.0.0.1:12350/api'; // 替换为实际的后端地址
 
 // 打开文件选择器并上传文件
 const openFilePicker = async (type) => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.csv,.xlsx'; // 可以根据需要调整文件类型
+  input.accept = '.csv, .xls, .xlsx'; // 可以根据需要调整文件类型
   input.onchange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
+      // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
       const formData = new FormData();
       formData.append('file', file);
-
-      const response = await axios.post(`/api/upload/${type}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await axios.post(`${API_BASE_URL}/import/${type}/${userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
-      if (response.data.success) {
+      if (response.data.code === 200) {
         if (type === 'classroom') {
           classroomImported.value = true;
         } else if (type === 'scheduling') {
@@ -141,10 +151,20 @@ const formatDate = (date) => {
 // 保存学期时间到后端
 const saveSemesterDates = async () => {
   try {
-    await axios.post('/api/semester/dates', {
-      startDate: startDate.value,
-      endDate: endDate.value,
+    // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+    const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+    if (!token) {
+      alert('请先登录');
+      return;
+    }
+    await axios.post(`${API_BASE_URL}/import/semester/1`, {
+      start_date: new Date(startDate.value).toISOString(),
+      end_date: new Date(endDate.value).toISOString(),
       weeks: weeks.value,
+    }, {
+      headers:{
+        'Authorization': `Bearer ${token}`,
+      }
     });
   } catch (error) {
     console.error('保存学期日期失败:', error.message); // 记录错误日志

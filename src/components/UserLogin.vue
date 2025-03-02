@@ -55,35 +55,39 @@ export default {
 
       try {
         // 发送登录请求到后端
-        const response = await axios.post("https://your-backend-api.com/login", {
+        const response = await axios.post("http://127.0.0.1:12350/login", {
           username: this.username,
           password: this.password,
         });
 
         // 检查后端响应
-        if (response.data.success) {
+        if (response.data.code == 200) {
           alert("登录成功");
 
           // 如果勾选了“记住我”，可以将 token 或用户信息存储到本地
           if (this.rememberMe) {
-            localStorage.setItem("userToken", response.data.token);
+            localStorage.setItem("userToken", response.data.data.token);
           } else {
-            sessionStorage.setItem("userToken", response.data.token);
+            sessionStorage.setItem("userToken", response.data.data.token);
           }
 
           // 跳转到主页或其他页面
-          this.$router.push({ name: "TaskList" });
+          this.$router.push({name: "TaskList"});
         } else {
           this.error = response.data.message || "账号或密码错误";
         }
       } catch (error) {
+        if (error.response && error.response.status === 401) {
+          this.error = "账号或密码错误";
+          return;
+        }
         this.error = "网络错误，请稍后再试";
       } finally {
         this.loading = false; // 结束加载状态
       }
     },
     goToRegister() {
-      this.$router.push({ name: "Register" });
+      this.$router.push({name: "Register"});
     },
   },
 };
@@ -95,11 +99,28 @@ export default {
   margin: 0 auto;
   padding: 20px;
 }
+
 .title {
   font-size: 24px;
   text-align: center;
   margin-bottom: 20px;
 }
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 左对齐 */
+  margin-top: 10px;
+}
+
+.checkbox-container input {
+  margin-right: 8px; /* 复选框与文本之间的间距 */
+}
+
+.checkbox-container label {
+  font-size: 14px; /* 字体大小 */
+}
+
 input {
   display: block;
   width: 100%;
@@ -108,14 +129,17 @@ input {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 .checkbox-container {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
 }
+
 #remember-me {
   margin-right: 5px;
 }
+
 button {
   width: 100%;
   padding: 10px;
@@ -125,16 +149,19 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
 button:disabled {
   background-color: #95a5a6;
   cursor: not-allowed;
 }
+
 .link {
   text-align: center;
   margin-top: 10px;
   color: #3498db;
   cursor: pointer;
 }
+
 .error {
   color: red;
   font-size: 14px;
