@@ -38,7 +38,7 @@ import StatisticsAnalysis from './StatisticsAnalysis.vue';
 // 定义状态
 const tabs = ['数据设置', '排课条件设置', '手动排课以及导出', '统计分析'];
 const currentTab = ref('数据设置');
-const dataImported = ref(false); // 数据是否已导入
+const dataImported = ref(true); // 数据是否已导入
 const progressSaved = ref(false); // 是否已保存进度
 const tabData = ref({}); // 各标签页的数据
 

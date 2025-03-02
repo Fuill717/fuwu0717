@@ -21,8 +21,8 @@
         <tr v-for="(task, index) in filteredTasks" :key="index">
           <td><input type="checkbox" v-model="selectedTasks" :value="task.id"></td>
           <td>{{ task.name }}</td>
-          <td>{{ task.semester }}</td>
-          <td>{{ task.modifiedTime }}</td>
+          <td>{{ task.duration }}</td>
+          <td>{{ task.updatedat }}</td>
           <td>
             <button @click="editTask(task)">修改</button>
             <button @click="copyTask(task)">复制</button>
@@ -37,7 +37,6 @@
         <h3>新建排课任务</h3>
         <form @submit.prevent="handleSubmit">
           <div class="form-group">
-            <label for="taskName">任务名称</label>
             <input type="text" id="taskName" v-model="taskName" @blur="validateTaskName" placeholder="请输入任务名称!" />
             <span class="error-message" v-if="!isValidTaskName">{{ taskNameError }}</span>
           </div>
@@ -108,7 +107,7 @@ export default {
       isValidTaskName: true,
       taskNameError: '',
       showDeleteModal: false,
-      API_BASE_URL: 'https://your-backend-api.com/api' // 替换为实际的后端地址
+      API_BASE_URL: 'http://127.0.0.1:12350/api' // 替换为实际的后端地址
     };
   },
   created() {
@@ -126,29 +125,54 @@ export default {
   },
   methods: {
     async fetchTasks() {
+      // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
       try {
-        const response = await axios.get(`${this.API_BASE_URL}/tasks`);
-        this.tasks = response.data; // 将后端返回的任务数据赋值给 tasks
+        const response = await axios.get(`${this.API_BASE_URL}/tasks`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.tasks = response.data.data.tasks; // 将后端返回的任务数据赋值给 tasks
       } catch (error) {
         console.error('获取任务列表失败:', error);
       }
     },
     async addTask() {
+      // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
       try {
         const newTask = {
           name: this.taskName,
-          semester: this.selectedSemester,
-          modifiedTime: new Date().toLocaleString()
+          duration: this.selectedSemester,
+          updatedat: new Date().toLocaleString()
         };
-
-        const response = await axios.post(`${this.API_BASE_URL}/tasks`, newTask);
-        this.tasks.push(response.data); // 将后端返回的新任务添加到任务列表
+        const response = await axios.post(`${this.API_BASE_URL}/tasks`, newTask, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.tasks.push(response.data.data.task); // 将后端返回的新任务添加到任务列表
         this.closeModal();
       } catch (error) {
         console.error('新增任务失败:', error);
       }
     },
     async deleteTask() {
+      // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
       if (this.selectedTasks.length > 0) {
         this.showDeleteModal = true;
       } else {
@@ -156,9 +180,19 @@ export default {
       }
     },
     async confirmDelete() {
+      // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
       try {
         for (const taskId of this.selectedTasks) {
-          await axios.delete(`${this.API_BASE_URL}/tasks/${taskId}`);
+          await axios.delete(`${this.API_BASE_URL}/tasks/${taskId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
         }
         this.tasks = this.tasks.filter(task => !this.selectedTasks.includes(task.id)); // 更新任务列表
         this.selectedTasks = [];
@@ -171,25 +205,73 @@ export default {
       
       this.showDeleteModal = false;
     },
-    editTask(task) {
+    async editTask(task) {
       console.log('Editing task:', task);
+
+      // 从 localStorage 中获取 token，若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
+
+      try {
+        // 假设用户通过某种方式更新了任务名称和学期
+        const updatedTask = {
+          name: task.name, // 更新后的任务名称
+          duration: task.duration, // 更新后的学期
+          updatedat: new Date().toLocaleString(), // 更新时间为当前时间
+        };
+
+        // 发送 PUT 或 PATCH 请求更新任务
+        const response = await axios.put(`${this.API_BASE_URL}/tasks/${task.id}`, updatedTask, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // 更新本地任务列表
+        const updatedTaskIndex = this.tasks.findIndex(t => t.id === task.id);
+        if (updatedTaskIndex !== -1) {
+          this.tasks.splice(updatedTaskIndex, 1, response.data.data.task); // 替换为更新后的任务
+        }
+
+        // 关闭编辑模态框或其他 UI 操作
+        this.closeModal();
+      } catch (error) {
+        console.error('更新任务失败:', error);
+        alert('更新任务失败，请稍后重试');
+      }
     },
     copyTask(task) {
-  const baseName = task.name;
-  let copyCount = this.tasks.filter(t => t.name.startsWith(baseName)).length;
+      // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
+      const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
+      try {
+        const baseName = task.name;
+        let copyCount = this.tasks.filter(t => t.name.startsWith(baseName)).length;
 
+        const newName = `${baseName}（${copyCount > 1 ? copyCount : 1}）`;
 
-  const newName = `${baseName}（${copyCount > 1 ? copyCount : 1}）`;
-
-  const copiedTask = { 
-    ...task, 
-    id: this.tasks.length + 1,
-    modifiedTime: new Date().toLocaleString(),
-    name: newName
-  };
-  
-  this.tasks.push(copiedTask);
-},
+        const copiedTask = {
+          ...task,
+          name: newName,
+          updatedat: new Date().toLocaleString(),
+        };
+        const response = axios.post(`${this.API_BASE_URL}/tasks`, copiedTask, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.tasks.push(response.data.data.task); // 将后端返回的新任务添加到任务列表
+        this.closeModal();
+      } catch (error) {
+        console.error('新增任务失败:', error);
+      }
+    },
     openNewTaskModal() {
       this.showModal = true;
       this.taskName = '';
