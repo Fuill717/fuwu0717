@@ -24,17 +24,17 @@
           <td>{{ task.duration }}</td>
           <td>{{ task.updatedat }}</td>
           <td>
-            <button @click="editTask(task)">修改</button>
+            <button @click="openEditModal(task)">修改</button>
             <button @click="copyTask(task)">复制</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <!-- 新建任务弹窗 -->
+    <!-- 新建/编辑任务弹窗 -->
     <div class="new-task-modal" v-if="showModal">
       <div class="modal-content">
-        <h3>新建排课任务</h3>
+        <h3>{{ isEditing ? '编辑排课任务' : '新建排课任务' }}</h3>
         <form @submit.prevent="handleSubmit">
           <div class="form-group">
             <input type="text" id="taskName" v-model="taskName" @blur="validateTaskName" placeholder="请输入任务名称!" />
@@ -79,7 +79,6 @@
 import axios from 'axios';
 
 export default {
-  
 
   data() {
     return {
@@ -91,6 +90,8 @@ export default {
       currentPage: 1,
       itemsPerPage: 10,
       showModal: false,
+      isEditing: false,
+      taskId: '',
       taskName: '',
       selectedSemester: '',
       semesters: [
@@ -153,7 +154,6 @@ export default {
         const newTask = {
           name: this.taskName,
           duration: this.selectedSemester,
-          updatedat: new Date().toLocaleString()
         };
         const response = await axios.post(`${this.API_BASE_URL}/tasks`, newTask, {
           headers: {
@@ -205,9 +205,7 @@ export default {
       
       this.showDeleteModal = false;
     },
-    async editTask(task) {
-      console.log('Editing task:', task);
-
+    async editTask() {
       // 从 localStorage 中获取 token，若没有则从 sessionStorage 中获取
       const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
       if (!token) {
@@ -216,34 +214,31 @@ export default {
       }
 
       try {
-        // 假设用户通过某种方式更新了任务名称和学期
         const updatedTask = {
-          name: task.name, // 更新后的任务名称
-          duration: task.duration, // 更新后的学期
-          updatedat: new Date().toLocaleString(), // 更新时间为当前时间
+          name: this.taskName, // 更新后的任务名称
+          duration: this.selectedSemester, // 更新后的学期
         };
 
         // 发送 PUT 或 PATCH 请求更新任务
-        const response = await axios.put(`${this.API_BASE_URL}/tasks/${task.id}`, updatedTask, {
+        const response = await axios.put(`${this.API_BASE_URL}/tasks/${this.taskId}`, updatedTask, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         // 更新本地任务列表
-        const updatedTaskIndex = this.tasks.findIndex(t => t.id === task.id);
+        const updatedTaskIndex = this.tasks.findIndex(task => task.id === this.taskId);
+        console.log(updatedTaskIndex);
         if (updatedTaskIndex !== -1) {
           this.tasks.splice(updatedTaskIndex, 1, response.data.data.task); // 替换为更新后的任务
         }
-
-        // 关闭编辑模态框或其他 UI 操作
         this.closeModal();
       } catch (error) {
         console.error('更新任务失败:', error);
         alert('更新任务失败，请稍后重试');
       }
     },
-    copyTask(task) {
+    async copyTask(task) {
       // 从 localStorage 中获取 token， 若没有则从 sessionStorage 中获取
       const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
       if (!token) {
@@ -252,6 +247,7 @@ export default {
       }
       try {
         const baseName = task.name;
+        const baseDuration = task.duration;
         let copyCount = this.tasks.filter(t => t.name.startsWith(baseName)).length;
 
         const newName = `${baseName}（${copyCount > 1 ? copyCount : 1}）`;
@@ -259,9 +255,9 @@ export default {
         const copiedTask = {
           ...task,
           name: newName,
-          updatedat: new Date().toLocaleString(),
+          duration: baseDuration,
         };
-        const response = axios.post(`${this.API_BASE_URL}/tasks`, copiedTask, {
+        const response = await axios.post(`${this.API_BASE_URL}/tasks`, copiedTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -271,6 +267,15 @@ export default {
       } catch (error) {
         console.error('新增任务失败:', error);
       }
+    },
+    // 打开弹窗进行编辑
+    openEditModal(task) {
+      this.taskId = task.id;
+      this.isEditing = true;
+      this.showModal = true;
+      this.taskName = task.name;
+      this.selectedSemester = task.duration;
+      this.isDropdownVisible = false;
     },
     openNewTaskModal() {
       this.showModal = true;
@@ -285,11 +290,13 @@ export default {
       this.isDropdownVisible = false;
     },
     handleSubmit() {
-      if (this.taskName && this.selectedSemester) {
+      if (this.taskName && this.selectedSemester && !this.isEditing) {
         this.addTask();
+      } else if (this.isEditing) {
+        this.editTask();
       } else {
-        this.taskNameError = '请填写所有必填项';
-        this.isValidTaskName = false;
+          this.taskNameError = '请填写所有必填项';
+          this.isValidTaskName = false;
       }
     },
     validateTaskName() {
