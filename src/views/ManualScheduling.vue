@@ -75,10 +75,10 @@ export default {
     return {
       timeSlots: [], // 初始化为空数组，从后端加载数据
       schedule: [
-        { time: '1节', cells: Array(7).fill({}) },
-        { time: '2节', cells: Array(7).fill({}) },
-        { time: '3节', cells: Array(7).fill({}) },
-        { time: '4节', cells: Array(7).fill({}) },
+        { time: '1节', cells: Array(7).fill().map(() => ({ selected: false })) },
+        { time: '2节', cells: Array(7).fill().map(() => ({ selected: false })) },
+        { time: '3节', cells: Array(7).fill().map(() => ({ selected: false })) },
+        { time: '4节', cells: Array(7).fill().map(() => ({ selected: false })) },
       ],
       viewMode: "classroom",
       daysOfWeek: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
@@ -127,7 +127,6 @@ export default {
         const dayIndex = this.daysOfWeek_En.indexOf(item.day_of_week);  // 获取星期几对应的索引
         if (dayIndex !== -1) {
           // 填充对应的课程
-          console.log("你好");
           console.log(item.class_name);
           this.schedule[item.period - 1].cells[dayIndex] = {
             class_name: item.class_name,
@@ -218,7 +217,7 @@ export default {
       console.log(rowIndex);
       console.log(colIndex);
       console.log("删除课程:", removedCourse);
-      if (removedCourse) {
+      if (removedCourse && removedCourse.class_name) {
         // 将课程对象及其位置信息添加到暂放区
         this.tempCourses.push(removedCourse);
       }
@@ -240,10 +239,16 @@ export default {
     },
     selectCell(rowIndex, colIndex) {
       const cell = this.schedule[rowIndex].cells[colIndex];
-      console.log("选中单元格:", cell);
       if (!cell || !cell.class_name) {
         this.selectedCell = [rowIndex, colIndex]; // 记录选中的单元格位置
-        cell.selected = true; // 设置选中状态
+        console.log("选中单元格:", rowIndex, colIndex);
+        console.log(this.schedule[rowIndex]);
+        console.log(cell);
+        if(cell.selected) {
+          cell.selected = false;
+        } else {
+          cell.selected = true; // 设置选中状态
+        }
       } else {
         alert("该单元格已有课程，无法选中");
       }
