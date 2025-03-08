@@ -49,7 +49,7 @@
       <ul>
         <li v-for="(course, index) in tempCourses" :key="index">
           <span>{{ course.class_name }}</span> <!-- 显示课程名称 -->
-          <button @click="restoreCourse(index)">恢复课程</button>
+          <button @click="restoreCourse(index)">放入课程</button>
           {{ course.name }}
         </li>
       </ul>
@@ -111,9 +111,11 @@ export default {
         this.tempCourses = this.courses.filter((course) =>
             !this.timeSlots.some((item) => item.class_id === course.class_id)
         );
+        console.log(this.tempCourses);
 
         // 将timeSlots放入schedule中
         this.fillSchedule()
+        console.log(this.schedule);
       } catch (error) {
         console.error("加载课表失败:", error);
         alert("加载课表失败，请稍后再试");
@@ -128,20 +130,14 @@ export default {
         if (dayIndex !== -1) {
           // 填充对应的课程
           console.log(item.class_name);
-          this.schedule[item.period - 1].cells[dayIndex] = {
-            class_name: item.class_name,
-            teacher_name: item.teacher_name,
-            day_of_week: item.day_of_week,
-            class_room: item.class_room,
-            is_available: item.is_available,
-            selected: false
-          };
+          this.schedule[item.period - 1].cells[dayIndex] = item;
         }
       });
     },
+
     async saveScheduleToBackend() {
       try {
-        await axios.post(`${API_BASE_URL}/schedule/save`, { schedule: this.schedule });
+        await axios.post(`${API_BASE_URL}/api/manual-schedule`, { schedule: this.schedule });
       } catch (error) {
         console.error("保存课表失败:", error);
         alert("保存课表失败，请稍后再试");
@@ -212,7 +208,7 @@ export default {
       // 导出为 Excel 或 PDF 的逻辑（需引入第三方库如 SheetJS 或 jsPDF）
       console.log("导出数据:", tableData);
     },
-    deleteCourse(rowIndex, colIndex) {
+    async deleteCourse(rowIndex, colIndex) {
       const removedCourse = this.schedule[rowIndex].cells[colIndex];
       console.log(rowIndex);
       console.log(colIndex);
@@ -224,7 +220,48 @@ export default {
       // 清空课表单元格
       this.schedule[rowIndex].cells[colIndex] = {};
       console.log(this.schedule);
-      // this.saveScheduleToBackend(); // 删除课程后保存到后端
+
+      // 删除课程后保存到后端
+      // 创建空课程对象来表示删除
+      const emptyCourse = {
+        day_of_week: this.daysOfWeek_En[colIndex], // 根据列索引获取星期几
+        teacher_name: '', // 空教师名称
+        class_name: '', // 空课程名称
+        period: rowIndex + 1, // 节次
+        classroom_name: removedCourse.classroom_name, // 空教室名称
+        is_available: false, // 是否可用（可以根据需求设置）
+      };
+
+      // 删除课程后，保存课表到后端
+      try {
+        const requestBody = {
+          day_of_week: emptyCourse.day_of_week,
+          teacher_name: emptyCourse.teacher_name,
+          class_name: emptyCourse.class_name,
+          period: emptyCourse.period,
+          classroom_name: emptyCourse.classroom_name,
+          is_available: emptyCourse.is_available,
+        };
+
+        // 发送空课程信息到后端
+        const response = await axios.post(`${API_BASE_URL}/manual-schedule`, requestBody, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken'),
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200) {
+          console.log('课程删除成功:', response.data);
+          alert("课程已删除并保存！");
+        } else {
+          console.error("课程删除失败:", response.status, response.data);
+          alert("课程删除失败，请稍后再试");
+        }
+      } catch (error) {
+        console.error("请求失败:", error);
+        alert("保存课表失败，请稍后再试");
+      }
     },
     restoreCourse(index) {
       const restoredCourse = this.tempCourses.splice(index, 1)[0]; // 移除暂放区的课程
@@ -234,7 +271,56 @@ export default {
         // 恢复课程到选中位置
         this.schedule[rowIndex].cells[colIndex] = restoredCourse;
 
-        // this.saveScheduleToBackend(); // 恢复课程后保存到后端
+        // 修改课程后保存到后端
+        this.editCell(restoredCourse);
+      }
+    },
+    async editCell(restoredCourse) {
+
+      // 确保恢复的课程对象包含必需的字段
+      if (!restoredCourse || !restoredCourse.class_name || !restoredCourse.teacher_name || !restoredCourse.class_id) {
+        alert("课程信息不完整，无法保存");
+        return;
+      }
+
+      // 获取选中的单元格位置
+      const [rowIndex, colIndex] = this.selectedCell;
+      const dayOfWeek = this.daysOfWeek_En[colIndex];  // 根据列索引获取星期几
+
+      // 获取该单元格的时间段
+      const period = rowIndex + 1;  // 这里假设 rowIndex 是从 0 开始的，且每个索引代表不同的时间段
+
+      // 构建请求体
+      const requestBody = {
+        day_of_week: dayOfWeek,  // 星期几，根据选中的列来设置
+        teacher_name: restoredCourse.teacher_name, // 教师名称
+        class_name: restoredCourse.class_name, // 课程名称
+        class_id : restoredCourse.class_id,
+        period: period, // 节次，从行索引获取
+        classroom_name: restoredCourse.classroom_name, // 教室名称
+        is_available: restoredCourse.is_available // 是否可用
+      };
+
+      try {
+        // 发送POST请求到后端，保存课程信息
+        const response = await axios.post(`${API_BASE_URL}/manual-schedule`, requestBody, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken'),
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // 检查响应结果
+        if (response.status === 200) {
+          console.log('课程保存成功:', response.data);
+          alert("课程已成功保存！");
+        } else {
+          console.error("课程保存失败:", response.status, response.data);
+          alert("课程保存失败，请稍后再试");
+        }
+      } catch (error) {
+        console.error("请求失败:", error);
+        alert("保存课程失败，请稍后再试");
       }
     },
     selectCell(rowIndex, colIndex) {

@@ -1,6 +1,6 @@
 
 <template>
-  <div class="TheHeader">
+  <div v-if="!isLoginPage && !isRegisterPage" class="TheHeader">
     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
       <span class="title">智能排课系统</span>
       <div style="display: flex; align-items: center;">
@@ -28,7 +28,14 @@ import { mapState, mapActions } from 'vuex';
 
 export default {
   computed: {
-    ...mapState(['username', 'currentTaskName'])
+    ...mapState(['username', 'currentTaskName']),
+    // 判断当前路由是否是登录页面
+    isLoginPage() {
+      return this.$route.name === 'Login'; // 当路由名称是 Login 时，隐藏 TheHeader
+    },
+    isRegisterPage() {
+      return this.$route.name === 'Register'; // 当路由名称是 Register 时，隐藏 TheHeader
+    }
   },
   methods: {
     ...mapActions(['logout'])
