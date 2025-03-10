@@ -160,9 +160,10 @@ export default {
     async autoSchedule() {
       // 自动排课
       try {
+        const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
         await axios.post(`${API_BASE_URL}/automated_scheduling`, null,{
           headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+            'Authorization': 'Bearer ' + token
           }
         });
         this.loadScheduleFromBackend(); // 自动排课后重新加载课表数据
