@@ -54,7 +54,7 @@
           </div>
           <div class="button-group">
             <button type="submit" class="btn btn-primary">确认</button>
-            <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
+            <button type="button" class="btn btn-off" @click="closeModal">取消</button>
           </div>
         </form>
       </div>
@@ -65,8 +65,8 @@
         <h3>温馨提示</h3>
         <p>您确定要删除所选任务吗？</p>
         <div class="button-group">
-          <button type="button" class="btn btn-secondary" @click="closeDeleteModal">我再想想</button>
-          <button type="button" class="btn btn-danger" @click="confirmDelete">继续删除</button>
+          <button type="button" class="btn btn-primary" @click="closeDeleteModal">我再想想</button>
+          <button type="button" class="btn btn-off" @click="confirmDelete">继续删除</button>
         </div>
       </div>
     </div>
@@ -338,6 +338,7 @@ export default {
 </script>
 
 <style scoped>
+
 .delete-modal {
   position: fixed;
   top: 0;
@@ -357,13 +358,14 @@ export default {
 
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
 
 .btn {
-  padding: 8px 16px;
+  width: 120px;
+  height:40px;
+  padding: 8px ;
   margin-right: 10px;
   border: none;
   border-radius: 4px;
@@ -376,14 +378,28 @@ export default {
 }
 
 .btn-danger {
+  background-color: white;
+  color: #dc3545;
+}
+.btn-off{
   background-color: #dc3545;
-  color: white;
+  color:white;
 }
-
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  width: 40px;
+  height:40px;
+  border-color: black;
+  background-color: white;
+  color: #6c757d;
+  margin-left: 10px;
 }
+.header>span{
+  margin-left:auto;
+}
+.header > span + .btn-secondary {
+      margin-left: 10px; /* 控制文本与导航按钮之间的间距 */
+    }
+
 
 .task-table {
   width: 100%;

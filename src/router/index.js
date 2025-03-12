@@ -21,13 +21,13 @@ const routes = [
     name: 'TaskList',
     component: TaskList,
     // 在这里添加路由守卫，确保只有登录后才能访问
-    meta: { requiresAuth: true }
+    //meta: { requiresAuth: true }
   },
   { path: '/scheduleTool',
     name: 'ScheduleTool',
     component: ScheduleTool,
     // 在这里添加路由守卫，确保只有登录后才能访问
-    meta: { requiresAuth: true }
+    //meta: { requiresAuth: true }
   }
 ];
 

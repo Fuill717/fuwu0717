@@ -109,8 +109,8 @@ export default {
 .checkbox-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* 左对齐 */
-  margin-top: 10px;
+  justify-content: space-between; /* 左右对齐 */
+  margin-bottom: 15px;
 }
 
 .checkbox-container input {
@@ -120,7 +120,6 @@ export default {
 .checkbox-container label {
   font-size: 14px; /* 字体大小 */
 }
-
 input {
   display: block;
   width: 100%;
@@ -128,12 +127,6 @@ input {
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
 }
 
 #remember-me {
