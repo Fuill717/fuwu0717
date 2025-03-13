@@ -68,7 +68,7 @@
 <script>
 import axios from "axios"; // 引入 Axios 进行 HTTP 请求
 
-const API_BASE_URL = 'http://127.0.0.1:12350/api'; // 替换为实际的后端地址
+const API_BASE_URL = 'http://47.97.56.13:12350/api'; // 替换为实际的后端地址
 
 export default {
   data() {

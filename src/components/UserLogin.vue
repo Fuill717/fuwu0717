@@ -55,7 +55,7 @@ export default {
 
       try {
         // 发送登录请求到后端
-        const response = await axios.post("http://127.0.0.1:12350/login", {
+        const response = await axios.post("http://47.97.56.13:12350/login", {
           username: this.username,
           password: this.password,
         });
