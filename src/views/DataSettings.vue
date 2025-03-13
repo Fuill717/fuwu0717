@@ -47,7 +47,7 @@ const endDate = ref(null); // 结束时间
 const isStartCalendarVisible = ref(false); // 控制开始时间日历的显示
 const weeks = ref([]); // 每周的时间段
 const userId = 1; // 用户 ID
-const API_BASE_URL = 'http://127.0.0.1:12350/api'; // 替换为实际的后端地址
+const API_BASE_URL = 'http://47.97.56.13:12350/api'; // 替换为实际的后端地址
 
 // 打开文件选择器并上传文件
 const openFilePicker = async (type) => {
