@@ -108,7 +108,7 @@ export default {
       isValidTaskName: true,
       taskNameError: '',
       showDeleteModal: false,
-      API_BASE_URL: 'http://127.0.0.1:12350/api' // 替换为实际的后端地址
+      API_BASE_URL: 'http://47.97.56.13:12350/api' // 替换为实际的后端地址
     };
   },
   created() {

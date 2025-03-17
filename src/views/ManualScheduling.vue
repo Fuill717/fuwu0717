@@ -68,7 +68,7 @@
 <script>
 import axios from "axios"; // 引入 Axios 进行 HTTP 请求
 
-const API_BASE_URL = 'http://127.0.0.1:12350/api'; // 替换为实际的后端地址
+const API_BASE_URL = 'http://47.97.56.13:12350/api'; // 替换为实际的后端地址
 
 export default {
   data() {
@@ -103,7 +103,7 @@ export default {
         };
         const response = await axios.post(`${API_BASE_URL}/schedule`, query,{
           headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
         });
         this.timeSlots = response.data.data.schedule; // 更新课表数据
@@ -147,7 +147,7 @@ export default {
       try {
         const response = await axios.get(`${API_BASE_URL}/courses`, {
           headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
         });
         this.courses = response.data.data.courses; // 更新课程列表
@@ -247,7 +247,7 @@ export default {
         // 发送空课程信息到后端
         const response = await axios.post(`${API_BASE_URL}/manual-schedule`, requestBody, {
           headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('userToken'),
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json',
           },
         });
@@ -306,7 +306,7 @@ export default {
         // 发送POST请求到后端，保存课程信息
         const response = await axios.post(`${API_BASE_URL}/manual-schedule`, requestBody, {
           headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('userToken'),
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json'
           }
         });
