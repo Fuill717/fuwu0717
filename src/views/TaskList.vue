@@ -24,8 +24,8 @@
           <td>{{ task.duration }}</td>
           <td>{{ task.updatedat }}</td>
           <td>
-            <button @click="openEditModal(task)">修改</button>
-            <button @click="copyTask(task)">复制</button>
+            <button class="btn btn-blank" @click="openEditModal(task)">修改</button>
+            <button class="btn btn-blank" @click="copyTask(task)">复制</button>
           </td>
         </tr>
       </tbody>
@@ -392,6 +392,12 @@ export default {
   background-color: white;
   color: #6c757d;
   margin-left: 10px;
+}
+.btn-blank{
+  color: rgba(0, 55, 255, 0.692);
+  background-color: white;
+  font-weight: bold;
+  font-size: 17px;
 }
 .header>span{
   margin-left:auto;

@@ -9,7 +9,6 @@
       >
         {{ tab }}
       </button>
-      <button @click="saveProgress">保存当前进度</button>
     </nav>
 
     <!-- 提示信息 -->
@@ -39,7 +38,6 @@ import StatisticsAnalysis from './StatisticsAnalysis.vue';
 const tabs = ['数据设置', '排课条件设置', '手动排课以及导出', '统计分析'];
 const currentTab = ref('数据设置');
 const dataImported = ref(true); // 数据是否已导入
-const progressSaved = ref(false); // 是否已保存进度
 const tabData = ref({}); // 各标签页的数据
 
 // 动态加载组件
@@ -84,17 +82,7 @@ const switchTab = async (tab) => {
   }
 };
 
-// 保存进度
-const saveProgress = async () => {
-  try {
-    await axios.post('/api/course-scheduler/save-progress', tabData.value);
-    progressSaved.value = true;
-    alert('进度已保存');
-  } catch (error) {
-    console.error('保存进度失败:', error);
-    alert('保存进度失败，请稍后再试');
-  }
-};
+
 
 // 处理子组件数据更新
 const handleUpdateData = (newData) => {

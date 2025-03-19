@@ -325,21 +325,55 @@ export default {
       }
     },
     selectCell(rowIndex, colIndex) {
-      const cell = this.schedule[rowIndex].cells[colIndex];
-      if (!cell || !cell.class_name) {
-        this.selectedCell = [rowIndex, colIndex]; // 记录选中的单元格位置
-        console.log("选中单元格:", rowIndex, colIndex);
-        console.log(this.schedule[rowIndex]);
-        console.log(cell);
-        if(cell.selected) {
-          cell.selected = false;
-        } else {
-          cell.selected = true; // 设置选中状态
-        }
-      } else {
-        alert("该单元格已有课程，无法选中");
+  const row = this.schedule[rowIndex];
+  const cell = row.cells[colIndex];
+
+  if (!cell || !cell.class_name) {
+    // 如果当前单元格没有课程
+    if (this.selectedCell && this.isSameCell(this.selectedCell, [rowIndex, colIndex])) {
+      // 如果再次点击同一个单元格，取消选中
+      this.clearSelectedCell();
+    } else {
+      // 记录新的选中单元格位置
+      this.selectedCell = [rowIndex, colIndex];
+      this.clearOtherSelections(); // 清除其他选中的单元格（可选）
+      cell.selected = true; // 设置选中状态
+    }
+    console.log("选中单元格:", rowIndex, colIndex);
+    console.log(row);
+    console.log(cell);
+  } else {
+    alert("该单元格已有课程，无法选中");
+  }
+},
+
+// 辅助函数：清除所有其他单元格的选中状态
+clearOtherSelections() {
+  this.schedule.forEach(row => {
+    row.cells.forEach(cell => {
+      if (cell.selected) {
+        cell.selected = false;
       }
-    },
+    });
+  });
+},
+
+// 辅助函数：判断两个单元格是否相同
+isSameCell(cell1, cell2) {
+  return cell1[0] === cell2[0] && cell1[1] === cell2[1];
+},
+
+// 辅助函数：清除当前选中的单元格
+clearSelectedCell() {
+  if (this.selectedCell) {
+    const [rowIndex, colIndex] = this.selectedCell;
+    const cell = this.schedule[rowIndex].cells[colIndex];
+    if (cell) {
+      cell.selected = false;
+    }
+    this.selectedCell = null;
+  }
+},
     addCourse(course) {
       if (!this.selectedCell) {
         alert("请先选择一个单元格");
