@@ -10,6 +10,13 @@
       </label>
     </div>
 
+    <!-- 添加task_id输入框 -->
+    <div class="task-id-input">
+      <label for="task-id">任务ID:</label>
+      <input type="number" id="task-id" v-model.number="rules.task_id" @change="saveRulesToBackend" />
+    </div>
+
+
     <!-- 选择先不排的课程 -->
     <div class="course-selection">
       <h3>选择先不排的课程</h3>
@@ -37,6 +44,9 @@
       </ul>
     </div>
 
+    <!-- 保存按钮 -->
+    <button @click="saveAllSettings" class="save-button">保存设置</button>
+
     <!-- 弹窗：选择课程 -->
     <div v-if="showCourseSelection" class="course-selection-modal">
       <h4>选择课程</h4>
@@ -56,7 +66,18 @@
 
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios'; // 引入 Axios 进行 HTTP 请求
+import axios from 'axios';
+
+// 假设您的token存储在localStorage中
+const token = localStorage.getItem('userToken');
+
+// 创建一个axios实例，配置默认headers
+const api = axios.create({
+  baseURL: 'http://47.97.56.13:12350/api', // 假设这是您的API基础URL
+  headers: {
+    'Authorization': `Bearer ${token}` // 在所有请求中添加token
+  }
+});
 
 // 数据定义
 const rules = ref({
@@ -65,6 +86,7 @@ const rules = ref({
   weekend: false,
   experiment: false,
   PE: false,
+  task_id: ref(1), // 初始化task_id为1
 });
 
 const showCourseSelection = ref(false);
@@ -89,7 +111,6 @@ const formatRuleName = (key) => {
 
 const clearSelectedCourses = () => {
   selectedCourses.value = [];
-  saveCoursesToBackend(); // 清空后同步到后端
 };
 
 const toggleHolidayCalendar = () => {
@@ -99,7 +120,6 @@ const toggleHolidayCalendar = () => {
 const confirmCourseSelection = () => {
   selectedCourses.value = [...tempSelectedCourses.value];
   showCourseSelection.value = false;
-  saveCoursesToBackend(); // 确认后同步到后端
 };
 
 const cancelCourseSelection = () => {
@@ -108,38 +128,37 @@ const cancelCourseSelection = () => {
 
 const clearHolidays = () => {
   holidays.value = [];
-  saveHolidaysToBackend(); // 清空后同步到后端
 };
 
-// 同步规则设置到后端
-const saveRulesToBackend = async () => {
+// 保存所有设置的函数
+const saveAllSettings = async () => {
   try {
-    await axios.post('/api/rules/settings', rules.value);
+    // 保存规则到后端
+    const rulesToSend = { ...rules.value, task_id: Math.abs(rules.value.task_id) };
+    const rulesResponse = await api.post('/set/conditions', rulesToSend);
+    console.log('规则保存成功:', rulesResponse.data);
+
+    // 保存课程选择到后端
+    const coursesToSend = selectedCourses.value.map(courseName => {
+      return { course_id: allCourses.value.indexOf(courseName) + 1, course_name: courseName };
+    });
+    const coursesDataToSend = { courses: coursesToSend, task_id: rules.value.task_id };
+    const coursesResponse = await api.post('/select/courses', coursesDataToSend);
+    console.log('课程选择保存成功:', coursesResponse.data);
+
+    // 保存节假日设置到后端
+    const holidaysDataToSend = { dates: holidays.value, task_id: rules.value.task_id };
+    const holidaysResponse = await api.post('/set/holidays', holidaysDataToSend);
+    console.log('节假日设置保存成功:', holidaysResponse.data);
+
+    alert('所有设置已保存成功');
   } catch (error) {
-    console.error('保存规则失败:', error);
-    alert('保存规则失败，请稍后再试');
+    console.error('保存设置失败:', error);
+    alert('保存设置失败，请稍后再试');
   }
 };
 
-// 同步课程选择到后端
-const saveCoursesToBackend = async () => {
-  try {
-    await axios.post('/api/courses/selection', { courses: selectedCourses.value });
-  } catch (error) {
-    console.error('保存课程选择失败:', error);
-    alert('保存课程选择失败，请稍后再试');
-  }
-};
 
-// 同步节假日设置到后端
-const saveHolidaysToBackend = async () => {
-  try {
-    await axios.post('/api/holidays/settings', { holidays: holidays.value });
-  } catch (error) {
-    console.error('保存节假日设置失败:', error);
-    alert('保存节假日设置失败，请稍后再试');
-  }
-};
 </script>
   <style scoped>
   .rule-settings {
@@ -160,6 +179,36 @@ const saveHolidaysToBackend = async () => {
   .holiday-setting h3 {
     margin-bottom: 10px;
   }
+
+  /* 添加task_id输入框样式 */
+  .task-id-input {
+    margin-top: 20px;
+  }
+
+  .task-id-input label {
+    margin-right: 10px;
+  }
+
+  .task-id-input input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  /* 保存按钮样式 */
+  .save-button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #409eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .save-button:hover {
+    background-color: #66b1ff;
+  }
   
   /* 按钮组样式 */
   .button-group {
@@ -176,6 +225,7 @@ const saveHolidaysToBackend = async () => {
     cursor: pointer;
     height: 40px;
   }
+
   
   /* 清空按钮样式 */
   .button-group .clear-button {
