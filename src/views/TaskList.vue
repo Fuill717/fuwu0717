@@ -108,7 +108,6 @@ export default {
       isValidTaskName: true,
       taskNameError: '',
       showDeleteModal: false,
-      API_BASE_URL: 'http://47.97.56.13:12350/api' // 替换为实际的后端地址
     };
   },
   created() {
@@ -133,7 +132,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get(`${this.API_BASE_URL}/tasks`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/tasks`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -155,7 +154,7 @@ export default {
           name: this.taskName,
           duration: this.selectedSemester,
         };
-        const response = await axios.post(`${this.API_BASE_URL}/tasks`, newTask, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/tasks`, newTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -188,7 +187,7 @@ export default {
       }
       try {
         for (const taskId of this.selectedTasks) {
-          await axios.delete(`${this.API_BASE_URL}/tasks/${taskId}`, {
+          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/tasks/${taskId}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -220,7 +219,7 @@ export default {
         };
 
         // 发送 PUT 或 PATCH 请求更新任务
-        const response = await axios.put(`${this.API_BASE_URL}/tasks/${this.taskId}`, updatedTask, {
+        const response = await axios.put(`${process.env.VUE_APP_API_BASE_URL}/tasks/${this.taskId}`, updatedTask, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -257,7 +256,7 @@ export default {
           name: newName,
           duration: baseDuration,
         };
-        const response = await axios.post(`${this.API_BASE_URL}/tasks`, copiedTask, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/tasks`, copiedTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }

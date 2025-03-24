@@ -68,8 +68,6 @@
 <script>
 import axios from "axios"; // 引入 Axios 进行 HTTP 请求
 
-const API_BASE_URL = 'http://47.97.56.13:12350/api'; // 替换为实际的后端地址
-
 export default {
   data() {
     return {
@@ -101,7 +99,7 @@ export default {
           "type" : "classroom",
           "name" : "HXGC2#201-化工分析实验室（一）"
         };
-        const response = await axios.post(`${API_BASE_URL}/schedule`, query,{
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/schedule`, query,{
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
@@ -137,7 +135,7 @@ export default {
 
     async saveScheduleToBackend() {
       try {
-        await axios.post(`${API_BASE_URL}/api/manual-schedule`, { schedule: this.schedule });
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, { schedule: this.schedule });
       } catch (error) {
         console.error("保存课表失败:", error);
         alert("保存课表失败，请稍后再试");
@@ -145,7 +143,7 @@ export default {
     },
     async loadCoursesFromBackend() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/courses`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/courses`, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
@@ -161,7 +159,7 @@ export default {
       // 自动排课
       try {
         const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-        await axios.post(`${API_BASE_URL}/automated_scheduling`, null,{
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/automated_scheduling`, null,{
           headers: {
             'Authorization': 'Bearer ' + token
           }
@@ -245,7 +243,7 @@ export default {
         };
 
         // 发送空课程信息到后端
-        const response = await axios.post(`${API_BASE_URL}/manual-schedule`, requestBody, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/manual-schedule`, requestBody, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json',
@@ -304,7 +302,7 @@ export default {
 
       try {
         // 发送POST请求到后端，保存课程信息
-        const response = await axios.post(`${API_BASE_URL}/manual-schedule`, requestBody, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/manual-schedule`, requestBody, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json'
