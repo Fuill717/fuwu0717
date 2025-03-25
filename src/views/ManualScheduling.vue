@@ -240,6 +240,7 @@ export default {
           period: emptyCourse.period,
           classroom_name: emptyCourse.classroom_name,
           is_available: emptyCourse.is_available,
+          task_id: removedCourse.task_id
         };
 
         // 发送空课程信息到后端
@@ -297,7 +298,8 @@ export default {
         class_id : restoredCourse.class_id,
         period: period, // 节次，从行索引获取
         classroom_name: restoredCourse.classroom_name, // 教室名称
-        is_available: restoredCourse.is_available // 是否可用
+        is_available: restoredCourse.is_available, // 是否可用
+        task_id: restoredCourse.task_id
       };
 
       try {
@@ -410,7 +412,7 @@ clearSelectedCell() {
   },
   created() {
     this.loadScheduleFromBackend(); // 页面加载时加载课表数据
-    this.loadCoursesFromBackend(); // 页面加载时加载课程列表
+    // this.loadCoursesFromBackend(); // 页面加载时加载课程列表
   },
 };
 </script>
