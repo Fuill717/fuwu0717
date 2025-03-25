@@ -410,7 +410,7 @@ clearSelectedCell() {
   },
   created() {
     this.loadScheduleFromBackend(); // 页面加载时加载课表数据
-    this.loadCoursesFromBackend(); // 页面加载时加载课程列表
+    // this.loadCoursesFromBackend(); // 页面加载时加载课程列表
   },
 };
 </script>
