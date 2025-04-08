@@ -49,7 +49,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       try {
         // 发送请求到后端验证 token 是否有效
-        const response = await axios.get('http://47.97.56.13:12350/api/profile', {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/profile`, {
           params: {
             service: 'rundo' // 传递 service 参数
           },
