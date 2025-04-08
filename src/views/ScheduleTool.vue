@@ -55,8 +55,9 @@ const currentComponent = computed(() => {
 onMounted(async () => {
   try {
     const response = await axios.get('/api/course-scheduler/init'); // 获取初始数据
-    tabData.value = response.data || {};
-    dataImported.value = !!tabData.value['数据设置']; // 检查是否有数据导入
+    tabData.value = response || {};
+    // dataImported.value = !!tabData.value['数据设置']; // 检查是否有数据导入
+    dataImported.value = true; // 检查是否有数据导入
   } catch (error) {
     console.error('初始化数据失败:', error);
   }

@@ -73,7 +73,7 @@ const token = localStorage.getItem('userToken');
 
 // 创建一个axios实例，配置默认headers
 const api = axios.create({
-  baseURL: 'http://47.97.56.13:12350/api', // 假设这是您的API基础URL
+  baseURL: `${process.env.VUE_APP_API_BASE_URL}/api`, // 假设这是您的API基础URL
   headers: {
     'Authorization': `Bearer ${token}` // 在所有请求中添加token
   }

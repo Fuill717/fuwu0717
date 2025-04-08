@@ -60,7 +60,7 @@ export default {
 
       try {
         // 发送注册请求到后端
-        const response = await axios.post("http://47.97.56.13:12350/register", {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/register`, {
           username: this.username,
           password: this.password,
           password_confirm: this.confirmPassword,

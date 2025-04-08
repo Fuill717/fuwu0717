@@ -132,7 +132,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/tasks`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -154,7 +154,7 @@ export default {
           name: this.taskName,
           duration: this.selectedSemester,
         };
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/tasks`, newTask, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, newTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -187,7 +187,7 @@ export default {
       }
       try {
         for (const taskId of this.selectedTasks) {
-          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/tasks/${taskId}`, {
+          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${taskId}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -219,7 +219,7 @@ export default {
         };
 
         // 发送 PUT 或 PATCH 请求更新任务
-        const response = await axios.put(`${process.env.VUE_APP_API_BASE_URL}/tasks/${this.taskId}`, updatedTask, {
+        const response = await axios.put(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${this.taskId}`, updatedTask, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -256,7 +256,7 @@ export default {
           name: newName,
           duration: baseDuration,
         };
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/tasks`, copiedTask, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, copiedTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }

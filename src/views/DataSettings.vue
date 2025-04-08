@@ -66,7 +66,7 @@ const openFilePicker = async (type) => {
       }
       const formData = new FormData();
       formData.append('file', file);
-      const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/import/${type}/${userId}`, formData, {
+      const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/${type}/${userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`,
@@ -156,7 +156,7 @@ const saveSemesterDates = async () => {
       alert('请先登录');
       return;
     }
-    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/import/semester/1`, {
+    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/semester/1`, {
       start_date: new Date(startDate.value).toISOString(),
       end_date: new Date(endDate.value).toISOString(),
       weeks: weeks.value,

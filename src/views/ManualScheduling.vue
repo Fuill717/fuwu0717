@@ -99,7 +99,7 @@ export default {
           "type" : "classroom",
           "name" : "HXGC2#201-化工分析实验室（一）"
         };
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/schedule`, query,{
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/schedule`, query,{
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
@@ -143,7 +143,7 @@ export default {
     },
     async loadCoursesFromBackend() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/courses`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/courses`, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
@@ -159,7 +159,7 @@ export default {
       // 自动排课
       try {
         const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/automated_scheduling`, null,{
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/automated_scheduling`, null,{
           headers: {
             'Authorization': 'Bearer ' + token
           }
@@ -244,7 +244,7 @@ export default {
         };
 
         // 发送空课程信息到后端
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/manual-schedule`, requestBody, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, requestBody, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json',
@@ -304,7 +304,7 @@ export default {
 
       try {
         // 发送POST请求到后端，保存课程信息
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/manual-schedule`, requestBody, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, requestBody, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json'
