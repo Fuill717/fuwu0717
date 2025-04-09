@@ -11,6 +11,11 @@
       </button>
     </nav>
 
+    <!-- Display the current TaskId -->
+    <div class="task-id-display">
+      <p>当前任务ID: {{ taskId }}</p>
+    </div>
+
     <!-- 提示信息 -->
     <div v-if="!dataImported && (currentTab !== '数据设置')">
       <p>请先完成数据导入。</p>
@@ -19,7 +24,8 @@
     <!-- 动态组件 -->
     <component 
       :is="currentComponent" 
-      v-else 
+      v-else
+      :task-id="taskId"
       :tab-data="tabData[currentTab]" 
       @update-data="handleUpdateData"
     ></component>
@@ -28,6 +34,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import axios from 'axios'; // 引入 Axios 进行 HTTP 请求
 import DataSettings from './DataSettings.vue';
 import SchedulingConditions from './SchedulingConditions.vue';
@@ -39,6 +46,8 @@ const tabs = ['数据设置', '排课条件设置', '手动排课以及导出', 
 const currentTab = ref('数据设置');
 const dataImported = ref(true); // 数据是否已导入
 const tabData = ref({}); // 各标签页的数据
+const route = useRoute();  // 获取路由对象
+const taskId = ref(route.query.taskId || '未设置');
 
 // 动态加载组件
 const currentComponent = computed(() => {

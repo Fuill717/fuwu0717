@@ -11,6 +11,7 @@
       <thead>
         <tr>
           <th><input type="checkbox" v-model="selectAll"></th>
+          <th>任务ID</th>
           <th>任务名称</th>
           <th>学期</th>
           <th>修改时间</th>
@@ -20,12 +21,14 @@
       <tbody>
         <tr v-for="(task, index) in filteredTasks" :key="index">
           <td><input type="checkbox" v-model="selectedTasks" :value="task.id"></td>
+          <td>{{ task.id }}</td>
           <td>{{ task.name }}</td>
           <td>{{ task.duration }}</td>
           <td>{{ task.updatedat }}</td>
           <td>
             <button class="btn btn-blank" @click="openEditModal(task)">修改</button>
             <button class="btn btn-blank" @click="copyTask(task)">复制</button>
+            <button class="btn btn-blank" @click="selectTask(task.id)">选择</button>
           </td>
         </tr>
       </tbody>
@@ -163,6 +166,14 @@ export default {
         this.closeModal();
       } catch (error) {
         console.error('新增任务失败:', error);
+      }
+    },
+    async selectTask(taskId) {
+      try {
+        this.taskId = taskId;
+        this.$router.push( {path: '/scheduleTool', query: {taskId: this.taskId} });
+      } catch (error) {
+        console.error('选择任务时出错:', error);
       }
     },
     async deleteTask() {

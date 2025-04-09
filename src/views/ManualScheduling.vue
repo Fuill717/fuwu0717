@@ -96,6 +96,7 @@ export default {
     async loadScheduleFromBackend() {
       try {
         const query = {
+          "task_id" : 121,
           "type" : "classroom",
           "name" : "HXGC2#201-化工分析实验室（一）"
         };
