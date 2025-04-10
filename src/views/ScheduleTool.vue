@@ -26,7 +26,7 @@
       :is="currentComponent" 
       v-else
       :task-id="taskId"
-      :tab-data="tabData[currentTab]" 
+      :tab-data="tabData[currentTab]"
       @update-data="handleUpdateData"
     ></component>
   </div>

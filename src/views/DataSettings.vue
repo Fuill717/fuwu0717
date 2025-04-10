@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineProps } from 'vue';
 import axios from 'axios'; // 引入 Axios 进行 HTTP 请求
 
 const classroomImported = ref(false);
@@ -46,7 +46,13 @@ const startDate = ref(null); // 开始时间
 const endDate = ref(null); // 结束时间
 const isStartCalendarVisible = ref(false); // 控制开始时间日历的显示
 const weeks = ref([]); // 每周的时间段
-const userId = 1; // 用户 ID
+// 声明 Props
+const props = defineProps({
+  taskId: {
+    type: [String, Number], // 类型校验
+    required: true,         // 强制要求父组件传递
+  }
+});
 
 // 打开文件选择器并上传文件
 const openFilePicker = async (type) => {
@@ -66,11 +72,14 @@ const openFilePicker = async (type) => {
       }
       const formData = new FormData();
       formData.append('file', file);
-      const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/${type}/${userId}`, formData, {
+      const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/${type}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`,
         },
+        params: {
+          task_id: props.taskId
+        }
       });
 
       if (response.data.code === 200) {
@@ -156,7 +165,7 @@ const saveSemesterDates = async () => {
       alert('请先登录');
       return;
     }
-    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/semester/1`, {
+    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/semester/${props.taskId.value}`, {
       start_date: new Date(startDate.value).toISOString(),
       end_date: new Date(endDate.value).toISOString(),
       weeks: weeks.value,

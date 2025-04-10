@@ -69,6 +69,10 @@
 import axios from "axios"; // 引入 Axios 进行 HTTP 请求
 
 export default {
+  props: [
+    "taskId", // 任务ID
+    "tabData" // 传递给子组件的数据
+  ],
   data() {
     return {
       timeSlots: [], // 初始化为空数组，从后端加载数据
@@ -96,7 +100,7 @@ export default {
     async loadScheduleFromBackend() {
       try {
         const query = {
-          "task_id" : 121,
+          "task_id" : Number(this.taskId),
           "type" : "classroom",
           "name" : "HXGC2#201-化工分析实验室（一）"
         };
