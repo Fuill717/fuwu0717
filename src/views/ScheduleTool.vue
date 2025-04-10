@@ -1,33 +1,42 @@
 <template>
   <div class="course-scheduler">
     <nav class="navigation-bar">
-      <button 
-        v-for="(tab, index) in tabs" 
-        :key="index" 
-        :class="{ active: currentTab === tab }" 
-        @click="switchTab(tab)"
+      <button
+          v-for="(tab, index) in tabs"
+          :key="index"
+          :class="{ active: currentTab === tab, 'has-data': dataImported }"
+          @click="switchTab(tab)"
       >
         {{ tab }}
+        <span class="tab-indicator"></span>
       </button>
     </nav>
 
     <!-- 提示信息 -->
-    <div v-if="!dataImported && (currentTab !== '数据设置')">
-      <p>请先完成数据导入。</p>
+    <div v-if="!dataImported && (currentTab !== '数据设置')" class="data-alert">
+      <div class="alert-content">
+        <svg class="alert-icon" viewBox="0 0 24 24">
+          <path fill="currentColor"
+                d="M11,15H13V17H11V15M11,7H13V13H11V7M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z"/>
+        </svg>
+        <p>请先完成数据导入</p>
+      </div>
     </div>
 
-    <!-- 动态组件 -->
-    <component 
-      :is="currentComponent" 
-      v-else 
-      :tab-data="tabData[currentTab]" 
-      @update-data="handleUpdateData"
-    ></component>
+    <div class="tab-content">
+      <component
+          :is="currentComponent"
+          v-show="dataImported || (currentTab === '数据设置')"
+          :tab-data="tabData[currentTab]"
+          @update-data="handleUpdateData"
+      ></component>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import axios from 'axios'; // 引入 Axios 进行 HTTP 请求
 import DataSettings from './DataSettings.vue';
 import SchedulingConditions from './SchedulingConditions.vue';
@@ -82,11 +91,9 @@ const switchTab = async (tab) => {
   }
 };
 
-
-
 // 处理子组件数据更新
 const handleUpdateData = (newData) => {
-  tabData.value[currentTab.value] = { ...tabData.value[currentTab.value], ...newData };
+  tabData.value[currentTab.value] = {...tabData.value[currentTab.value], ...newData};
 };
 </script>
 
@@ -94,33 +101,129 @@ const handleUpdateData = (newData) => {
 .course-scheduler {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background-color: #f5f7fa;
 }
 
 .navigation-bar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  padding: 0 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
 }
 
 .navigation-bar button {
-  padding: 5px 15px;
-  margin-right: 10px;
+  padding: 12px 24px;
+  margin-right: 4px;
   border: none;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: #5f6368;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  position: relative;
+  outline: none;
+}
+
+.navigation-bar button:hover {
+  color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.04);
 }
 
 .navigation-bar button.active {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
+  color: #1976d2;
+  font-weight: 600;
 }
 
-.navigation-bar button:last-child {
-  margin-right: 0;
+.navigation-bar button.active .tab-indicator {
+  transform: scaleX(1);
+  background-color: #1976d2;
+}
+
+.navigation-bar button.has-data:after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #4caf50;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: transparent;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.data-alert {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff3e0;
+  border-radius: 8px;
+  margin: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-icon {
+  width: 24px;
+  height: 24px;
+  color: #ff9800;
+}
+
+.data-alert p {
+  margin: 0;
+  color: #e65100;
+  font-weight: 500;
+}
+
+.tab-content {
+  flex: 1;
+  padding: 24px;
+  background-color: white;
+  margin: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .navigation-bar {
+    overflow-x: auto;
+    padding: 0 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .navigation-bar button {
+    padding: 12px 16px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .tab-content {
+    margin: 8px;
+    padding: 16px;
+  }
 }
 </style>

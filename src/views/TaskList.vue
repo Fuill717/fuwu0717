@@ -72,7 +72,7 @@
     </div>
   </div>
 
-  
+
 </template>
 
 <script>
@@ -201,7 +201,7 @@ export default {
       }
     },
     closeDeleteModal() {
-      
+
       this.showDeleteModal = false;
     },
     async editTask() {
@@ -337,157 +337,168 @@ export default {
 </script>
 
 <style scoped>
-
-.delete-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+/* 全局变量 */
+:root {
+  --primary-color: #4361ee;
+  --primary-hover: #3a56d4;
+  --danger-color: #ef233c;
+  --danger-hover: #d90429;
+  --success-color: #4bb543;
+  --text-color: #2b2d42;
+  --text-light: #6c757d;
+  --light-gray: #f8f9fa;
+  --gray: #adb5bd;
+  --border-color: #e9ecef;
+  --white: #ffffff;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --border-radius: 8px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* 容器样式 */
 .task-list-container {
-  margin: 20px;
+  margin: 30px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* 头部区域 */
 .header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+.header > span {
+  margin-left: auto;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* 按钮样式 */
 .btn {
-  width: 120px;
-  height:40px;
-  padding: 8px ;
-  margin-right: 10px;
+  padding: 10px 16px;
+  margin-right: 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-  background-color: #007bff;
-  color: white;
+  background-color: #4361ee;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #3a56d4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
 }
 
 .btn-danger {
-  background-color: white;
-  color: #dc3545;
+  background-color: #ffffff;
+  color: #ef233c;
+  border: 1px solid #ef233c;
 }
-.btn-off{
-  background-color: #dc3545;
-  color:white;
+
+.btn-danger:hover {
+  background-color: #ef233c;
+  color: #ffffff;
+  transform: translateY(-2px);
 }
+
+.btn-off {
+  background-color: #ef233c;
+  color: #ffffff;
+}
+
+.btn-off:hover {
+  background-color: #d90429;
+  transform: translateY(-2px);
+}
+
 .btn-secondary {
   width: 40px;
-  height:40px;
-  border-color: black;
-  background-color: white;
+  height: 40px;
+  background-color: #ffffff;
   color: #6c757d;
-  margin-left: 10px;
+  border: 1px solid #e9ecef;
 }
-.btn-blank{
-  color: rgba(0, 55, 255, 0.692);
-  background-color: white;
-  font-weight: bold;
-  font-size: 17px;
-}
-.header>span{
-  margin-left:auto;
-}
-.header > span + .btn-secondary {
-      margin-left: 10px; /* 控制文本与导航按钮之间的间距 */
-    }
 
+.btn-secondary:hover {
+  background-color: #f8f9fa;
+  color: #4361ee;
+  border-color: #4361ee;
+}
 
+.btn-blank {
+  color: #4361ee;
+  background-color: transparent;
+  font-weight: 500;
+  padding: 6px 10px;
+  margin: 0 5px;
+  box-shadow: none;
+}
+
+.btn-blank:hover {
+  background-color: rgba(67, 97, 238, 0.1);
+  text-decoration: underline;
+}
+
+/* 表格样式 */
 .task-table {
   width: 100%;
-  background-color: white;
-  border-collapse: collapse;
+  background-color: #ffffff;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .task-table th,
 .task-table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-
-.task-table th {
-  background-color: #f2f2f2;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e9ecef;
   text-align: left;
 }
 
-.task-table td input[type="checkbox"] {
-  margin-right: 10px;
-}
-.new-task-modal {
-  position: fixed;
+.task-table th {
+  background-color: #f8f9fa;
+  color: #2b2d42;
+  font-weight: 600;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
 }
 
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 300px;
+.task-table tr:last-child td {
+  border-bottom: none;
 }
 
-.form-group {
-  margin-bottom: 15px;
+.task-table tr:hover td {
+  background-color: rgba(67, 97, 238, 0.03);
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.error-message {
-  color: red;
-  font-size: 12px;
-}
-
-.dropdown-list {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-top: 5px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.dropdown-list li {
-  list-style: none;
-  padding: 8px;
+.task-table td input[type="checkbox"] {
+  accent-color: #4361ee;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
-.dropdown-list li:hover {
-  background-color: #f0f0f0;
-}
+/* 模态框样式 */
+.new-task-modal,
 .delete-modal {
   position: fixed;
   top: 0;
@@ -499,55 +510,168 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
-  background-color: white;
-  padding: 20px;
+  background-color: #ffffff;
+  padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  max-width: 90%;
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  animation: slideUp 0.3s ease;
 }
 
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #2b2d42;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.modal-content h3::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(to bottom, #4361ee, #3a0ca3);
+  margin-right: 10px;
+  border-radius: 2px;
+}
+
+/* 表单样式 */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  position: relative;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  color: #2b2d42;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4361ee;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+.form-group input::placeholder {
+  color: #adb5bd;
 }
 
 .error-message {
-  color: red;
+  color: #ef233c;
   font-size: 12px;
+  margin-top: 5px;
+  display: block;
 }
 
+/* 下拉列表 */
 .dropdown-list {
   position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-top: 5px;
+  width: 100%;
   max-height: 200px;
   overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-top: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .dropdown-list li {
-  list-style: none;
-  padding: 8px;
+  padding: 10px 12px;
   cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .dropdown-list li:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(67, 97, 238, 0.1);
+  color: #4361ee;
+}
+
+/* 按钮组 */
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* 删除模态框特定样式 */
+.delete-modal .modal-content {
+  text-align: center;
+}
+
+.delete-modal p {
+  margin: 20px 0;
+  color: #2b2d42;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .task-list-container {
+    margin: 15px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .header > span {
+    margin-left: 0;
+    margin-right: auto;
+    order: 1;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .task-table th,
+  .task-table td {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .modal-content {
+    width: 90%;
+    padding: 20px;
+  }
 }
 </style>

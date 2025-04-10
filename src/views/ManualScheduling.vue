@@ -420,7 +420,14 @@ clearSelectedCell() {
 .schedule-page {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
+
 .course-table {
   font-family: Arial, sans-serif;
   border: 1px solid #ddd;
@@ -446,27 +453,154 @@ clearSelectedCell() {
   background-color: #f0f0f0;
 }
 
-.cell {
-  height: 60px;
-  background-color: #fff;
+.toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.toolbar button, .toolbar select {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4a6baf;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.toolbar button:hover {
+  background-color: #3a5a9f;
+  transform: translateY(-2px);
+}
+
+.toolbar select {
+  background-color: white;
+  color: #333;
   border: 1px solid #ddd;
-  cursor: pointer; /* 鼠标悬停时显示为手型 */
+}
+
+.course-table {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header, .row {
+  display: grid;
+  grid-template-columns: 100px repeat(7, 1fr);
+  align-items: stretch;
+}
+
+.header > div, .row > div {
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header > div {
+  background-color: #4a6baf;
+  color: white;
+  font-weight: bold;
+  border-color: #3a5a9f;
+}
+
+.time {
+  background-color: #f1f5fd;
+  font-weight: bold;
+  color: #333;
+}
+
+.cell {
+  height: 80px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .cell:hover {
-  background-color: #f9f9f9;
+  background-color: #f5f7ff;
+  box-shadow: inset 0 0 0 2px #4a6baf;
 }
 
-/* 选中状态样式 */
 .cell.selected {
-  background-color: #d4edda; /* 绿色背景表示选中 */
-  color: #155724;
+  background-color: #e1e8ff;
+  box-shadow: inset 0 0 0 2px #4a6baf;
   font-weight: bold;
 }
-.toolbar {
+
+/* 有课程的格子样式 */
+.cell[class_name] {
+  background-color: #e8f4ff;
+  color: #2c3e50;
+  font-size: 14px;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 空闲格子样式 */
+.cell:empty::after {
+  content: '空闲';
+  color: #95a5a6;
+  font-size: 12px;
+}
+
+.temp-course-area {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.temp-course-area h4 {
+  margin-top: 0;
+  color: #4a6baf;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.temp-course-area ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.temp-course-area li {
+  background-color: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  border-left: 4px solid #4a6baf;
+}
+
+.temp-course-area button {
+  padding: 5px 10px;
+  background-color: #4a6baf;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.temp-course-area button:hover {
+  background-color: #3a5a9f;
 }
 
 .schedule-preview {
@@ -502,21 +636,97 @@ clearSelectedCell() {
   margin-left: 10px;
 }
 
-.temp-course-area ul {
-  list-style: none;
-  padding: 0;
-}
-
-.temp-course-area li {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.temp-course-area button {
-  margin-right: 10px;
-}
 .task-statistics {
   margin-top: 10px;
+}
+
+.task-statistics {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.task-statistics p {
+  margin: 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.task-statistics p:nth-child(1) {
+  border-left: 4px solid #4a6baf;
+}
+.task-statistics p:nth-child(2) {
+  border-left: 4px solid #28a745;
+}
+.task-statistics p:nth-child(3) {
+  border-left: 4px solid #dc3545;
+}
+.task-statistics p:nth-child(4) {
+  border-left: 4px solid #ffc107;
+}
+
+@media (max-width: 768px) {
+  .header, .row {
+    grid-template-columns: 80px repeat(7, 1fr);
+  }
+
+  .cell {
+    height: 60px;
+    font-size: 12px;
+  }
+
+  .task-statistics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .toolbar {
+    gap: 8px;
+  }
+
+  .toolbar button, .toolbar select {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header, .row {
+    grid-template-columns: 60px repeat(7, 1fr);
+  }
+
+  .cell {
+    height: 50px;
+    font-size: 10px;
+  }
+
+  .task-statistics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 添加一些微妙的动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.course-table, .temp-course-area, .task-statistics {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* 课程添加/删除动画 */
+.cell {
+  transition: all 0.3s ease;
+}
+
+/* 按钮点击效果 */
+button:active {
+  transform: scale(0.98);
 }
 </style>

@@ -160,114 +160,465 @@ const saveAllSettings = async () => {
 
 
 </script>
-  <style scoped>
+<style scoped>
+.rule-settings {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+
+.course-selection,
+.holiday-setting {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+}
+
+.course-selection h3,
+.holiday-setting h3 {
+  margin-top: 0;
+  color: #333333;
+}
+
+.course-selection ul,
+.holiday-setting ul {
+  padding: 0;
+  list-style: none;
+}
+
+.course-selection ul li,
+.holiday-setting ul li {
+  background-color: #ffffff;
+  margin-bottom: 5px;
+  padding: 10px;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+}
+
+.course-selection-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.course-selection-modal .modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.course-selection-modal h4 {
+  margin-top: 0;
+  color: #333333;
+}
+
+.course-selection-modal ul {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0;
+  list-style: none;
+}
+
+.course-selection-modal li {
+  margin-bottom: 10px;
+}
+
+.course-selection-modal button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.course-selection-modal button:hover {
+  background-color: #409eff;
+  color: white;
+}
+
+/* 添加动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rule-settings h2 {
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 12px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+}
+
+.rule-settings h2::before {
+  content: "⚙️";
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.rule-option {
+  margin-bottom: 18px;
+  padding: 12px 15px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.rule-option:hover {
+  background-color: #f1f5f9;
+  transform: translateX(5px);
+}
+
+.rule-option label {
+  display: flex;
+  align-items: center;
+  color: #4a5568;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.rule-option input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e0;
+  border-radius: 4px;
+  margin-right: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rule-option input[type="checkbox"]:checked {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.rule-option input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.task-id-input {
+  margin: 25px 0;
+  padding: 15px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.task-id-input label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.task-id-input input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.task-id-input input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+}
+
+.section-container {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  border-left: 4px solid #3498db;
+}
+
+.section-container h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.section-container h3::before {
+  content: "📌";
+  margin-right: 8px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.button-group button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.button-group button::before {
+  margin-right: 6px;
+}
+
+.button-group button:first-child {
+  background-color: #3498db;
+  color: white;
+}
+
+.button-group button:first-child:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.button-group .clear-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.button-group .clear-button:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+.section-container ul {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.section-container ul li {
+  background-color: white;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+}
+
+.section-container ul li::before {
+  content: "✔";
+  color: #27ae60;
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.save-button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 30px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+}
+
+.save-button:hover {
+  background-color: #219653;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(39, 174, 96, 0.3);
+}
+
+.save-button:active {
+  transform: translateY(0);
+}
+
+.course-selection-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.4s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 20px;
+  background-color: #3498db;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-body ul {
+  padding: 0;
+  list-style: none;
+}
+
+.modal-body li {
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-body li:last-child {
+  border-bottom: none;
+}
+
+.modal-body label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-body label:hover {
+  color: #3498db;
+}
+
+.modal-body input[type="checkbox"] {
+  margin-right: 12px;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background-color: #f8fafc;
+}
+
+.modal-footer button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-footer button:first-child {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.modal-footer button:last-child {
+  background-color: #3498db;
+  color: white;
+}
+
+.modal-footer button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
   .rule-settings {
-    padding: 20px;
-    background-color: #f5f5f5;
-  }
-  
-  .rule-option {
-    margin-bottom: 10px;
-  }
-  
-  .course-selection,
-  .holiday-setting {
-    margin-top: 20px;
-  }
-  
-  .course-selection h3,
-  .holiday-setting h3 {
-    margin-bottom: 10px;
+    padding: 20px 15px;
   }
 
-  /* 添加task_id输入框样式 */
-  .task-id-input {
-    margin-top: 20px;
+  .section-container {
+    padding: 15px;
   }
 
-  .task-id-input label {
-    margin-right: 10px;
-  }
-
-  .task-id-input input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  /* 保存按钮样式 */
-  .save-button {
-    padding: 10px 20px;
-    margin-top: 20px;
-    background-color: #409eff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .save-button:hover {
-    background-color: #66b1ff;
-  }
-  
-  /* 按钮组样式 */
   .button-group {
-    display: flex;
-    gap: 10px; /* 设置按钮之间的间距 */
-    align-items: center;
-  }
-  
-  /* 默认按钮样式 */
-  .button-group button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    height: 40px;
+    flex-direction: column;
   }
 
-  
-  /* 清空按钮样式 */
-  .button-group .clear-button {
-    background-color: #ff4d4f; /* 红色背景 */
-    color: white;
-    font-size: 12px; /* 字体变小 */
-    padding: 4px 8px ; /* 尺寸变小 */
-    width: 80px;
-    height: 40px;
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
   }
-  
-  /* 清空按钮悬停效果 */
-  .button-group .clear-button:hover {
-    background-color: #ff7875; /* 稍浅的红色 */
-  }
-  
-  .course-selection ul li,
-  .holiday-setting ul li {
-    list-style-type: none;
-    margin-bottom: 5px;
-  }
-  
-  .course-selection-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .course-selection-modal ul {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  .course-selection-modal button {
-    margin-top: 10px;
-  }
-  </style>
+}
+
+/* 添加一些微妙的过渡效果 */
+* {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* 输入框和按钮的聚焦状态 */
+input:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+/* 禁用文本选择 */
+button, label {
+  user-select: none;
+}
+
+/* 平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+</style>
