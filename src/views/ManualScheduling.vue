@@ -102,7 +102,7 @@ export default {
         const query = {
           "task_id" : Number(this.taskId),
           "type" : "classroom",
-          "name" : "HXGC2#201-化工分析实验室（一）"
+          "name" : "HXGC2#202"
         };
         const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/schedule`, query,{
           headers: {
@@ -193,7 +193,13 @@ export default {
       }
     },
     resetSchedule() {
-      this.loadScheduleFromBackend(); // 重置课表时重新加载初始数据
+      for (let rowIndex = 0; rowIndex < 4; rowIndex++) {
+        for (let colIndex = 0; colIndex < 7; colIndex++) {
+          if (this.schedule[rowIndex].cells[colIndex].id !== undefined){
+            this.deleteCourse(rowIndex, colIndex)
+          }
+        }
+      }
     },
     setViewMode() {
       console.log("切换视角为:", this.viewMode);
@@ -217,6 +223,10 @@ export default {
       console.log(rowIndex);
       console.log(colIndex);
       console.log("删除课程:", removedCourse);
+      if (this.schedule[rowIndex].cells[colIndex].id === undefined) {
+        alert("该单元格没有课程，无法删除");
+        return;
+      }
       if (removedCourse && removedCourse.class_name) {
         // 将课程对象及其位置信息添加到暂放区
         this.tempCourses.push(removedCourse);
@@ -258,7 +268,7 @@ export default {
 
         if (response.status === 200) {
           console.log('课程删除成功:', response.data);
-          alert("课程已删除并保存！");
+          // alert("课程已删除并保存！");
         } else {
           console.error("课程删除失败:", response.status, response.data);
           alert("课程删除失败，请稍后再试");

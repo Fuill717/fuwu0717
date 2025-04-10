@@ -79,7 +79,7 @@ const openFilePicker = async (type) => {
         },
         params: {
           task_id: props.taskId
-        }
+        },
       });
 
       if (response.data.code === 200) {
@@ -165,13 +165,16 @@ const saveSemesterDates = async () => {
       alert('请先登录');
       return;
     }
-    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/semester/${props.taskId.value}`, {
+    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/import/semester`, {
       start_date: new Date(startDate.value).toISOString(),
       end_date: new Date(endDate.value).toISOString(),
       weeks: weeks.value,
     }, {
       headers: {
         'Authorization': `Bearer ${token}`,
+      },
+      params: {
+        task_id: props.taskId
       }
     });
   } catch (error) {
