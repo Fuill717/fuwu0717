@@ -205,18 +205,35 @@ export default {
       console.log("切换视角为:", this.viewMode);
       // 实现视角切换逻辑
     },
-    exportSchedule() {
-      const tableData = [];
-      this.schedule.forEach((row) => {
-        const rowData = [row.time];
-        row.cells.forEach((cell) => {
-          rowData.push(cell.class_name || "空闲");
+    async exportSchedule() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/export`, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
+            'Content-Type': 'application/json',
+          },
+          params: {
+            'file': "课程表.xlsx",
+          },
+          responseType: 'blob' // 关键配置
         });
-        tableData.push(rowData);
-      });
+        // 创建 Blob 对象并触发下载
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '课程表.xlsx'); // 设置下载文件名
+        document.body.appendChild(link);
+        link.click();
 
-      // 导出为 Excel 或 PDF 的逻辑（需引入第三方库如 SheetJS 或 jsPDF）
-      console.log("导出数据:", tableData);
+        // 清理临时对象
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        alert("课表已成功导出！");
+      } catch (error) {
+        console.error("导出失败:", error);
+        alert("导出课表失败，请稍后再试");
+      }
     },
     async deleteCourse(rowIndex, colIndex) {
       const removedCourse = this.schedule[rowIndex].cells[colIndex];
