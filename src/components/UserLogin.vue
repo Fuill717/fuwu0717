@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="logo-container">
-        <div class="logo">慧排课</div>
+        <div class="logo"></div>
         <h1 class="login-title">智慧排课系统</h1>
       </div>
       <p class="login-subtitle">高效管理课程安排，提升教学效率</p>
@@ -73,7 +73,7 @@
     </div>
 
     <div class="footer">
-      <p>© 2025 智慧排课系统</p>
+      <p>© 2025 智慧排课系统 | 慧排课</p>
     </div>
   </div>
 </template>
@@ -247,7 +247,10 @@ export default {
 .logo {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  background: url('../assets/logo2.png') no-repeat;
+  background-size: cover; /* 确保图片覆盖整个元素 */
+  background-position: center; /* 图片居中显示 */
+  background-repeat: no-repeat; /* 防止图片重复 */
   color: white;
   border-radius: 16px;
   display: flex;

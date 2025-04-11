@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <div class="logo">慧排课</div>
+      <div class="logo"></div>
       <h1 class="title">创建您的账户</h1>
       <p class="subtitle">开始您的旅程</p>
     </div>
@@ -41,6 +41,10 @@
         已有账号？ <span @click="goToLogin">登录</span>
       </div>
     </form>
+
+    <div class="footer">
+      <p>© 2025 智慧排课系统 | 慧排课</p>
+    </div>
   </div>
 </template>
 
@@ -137,7 +141,10 @@ export default {
   width: 60px;
   height: 60px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #3498db, #2c3e50);
+  background: url('../assets/logo2.png') no-repeat;
+  background-size: cover; /* 确保图片覆盖整个元素 */
+  background-position: center; /* 图片居中显示 */
+  background-repeat: no-repeat; /* 防止图片重复 */
   color: white;
   border-radius: 12px;
   display: flex;
