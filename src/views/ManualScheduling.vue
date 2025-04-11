@@ -74,9 +74,9 @@
 
     <!-- 统计信息 -->
     <div class="task-statistics">
-      <p>总任务数: {{ totalTasks }}</p>
-      <p>已完成数: {{ completedTasks }}</p>
-      <p>未完成数: {{ uncompletedTasks }}</p>
+      <p>总任务数: {{ timeSlots.length }}</p>
+      <p>已完成数: {{ timeSlots.length - tempCourses.length }}</p>
+      <p>未完成数: {{ tempCourses.length }}</p>
       <p>未完成原因: {{ uncompletedReasons }}</p>
     </div>
   </div>
@@ -107,8 +107,6 @@ export default {
       filteredCourses: [],
       selectedCourses: [],
       tempCourses: [],
-      totalTasks: 0,
-      completedTasks: 0,
       uncompletedTasks: 0,
       uncompletedReasons: ["课表冲突", "手动删除", "设置冲突"],
     };
@@ -119,7 +117,7 @@ export default {
         const query = {
           "task_id": Number(this.taskId),
           "type": "classroom",
-          "name": "HXGC2#202"
+          "name": "HXGC2#201-化工分析实验室（一）"
         };
         const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/schedule`, query, {
           headers: {
@@ -567,7 +565,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   background-color: #f8f9fa;
-  min-height: 100vh;
+  min-height: 150vh;
 }
 
 .course-table {
@@ -606,7 +604,7 @@ export default {
 }
 
 .toolbar button, .toolbar select {
-  padding: 8px 15px;
+  padding: 4px 15px;
   border: none;
   border-radius: 4px;
   background-color: #4a6baf;
