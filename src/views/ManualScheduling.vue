@@ -1,16 +1,33 @@
 <template>
   <div class="schedule-page">
+    <!-- 新增搜索框容器 -->
+    <div class="top-search-container">
+      <div class="search-container">
+        <select v-model="searchType">
+          <option value="classroom">教室</option>
+          <option value="teacher">教师</option>
+        </select>
+        <input
+            type="text"
+            v-model="searchKeyword"
+            placeholder="输入搜索关键词"
+            @keyup.enter="performSearch"
+        >
+        <button @click="performSearch">搜索</button>
+      </div>
+    </div>
+
     <!-- 功能栏 -->
     <div class="toolbar">
       <button @click="autoSchedule">自动排课</button>
       <button @click="checkSchedule">课表检测</button>
       <button @click="resetSchedule">重置课表</button>
 
-      <select @change="setViewMode" v-model="viewMode">
-        <option value="classroom">教室课表</option>
-        <option value="class">教学班课表</option>
-        <option value="teacher">教师课表</option>
-      </select>
+      <!--      <select @change="setViewMode" v-model="viewMode">-->
+      <!--        <option value="classroom">教室课表</option>-->
+      <!--        <option value="class">教学班课表</option>-->
+      <!--        <option value="teacher">教师课表</option>-->
+      <!--      </select>-->
       <button @click="exportSchedule">导出</button>
     </div>
 
@@ -22,27 +39,27 @@
       <div v-for="(row, rowIndex) in schedule" :key="rowIndex" class="row">
         <div class="time">{{ row.time }}</div> <!-- 显示时间 -->
         <div
-          v-for="(cell, colIndex) in row.cells"
-          :key="colIndex"
-          class="cell"
-          :class="{ selected: cell.selected }"
-          @click="selectCell(rowIndex, colIndex)"
-          @contextmenu.prevent="deleteCourse(rowIndex, colIndex)"
+            v-for="(cell, colIndex) in row.cells"
+            :key="colIndex"
+            class="cell"
+            :class="{ selected: cell.selected }"
+            @click="selectCell(rowIndex, colIndex)"
+            @contextmenu.prevent="deleteCourse(rowIndex, colIndex)"
         >
           {{ cell.class_name || '空闲' }} <!-- 显示课程名称或“空闲” -->
         </div>
       </div>
     </div>
 
-<!--    <div class="course-selector">-->
-<!--      <input type="text" placeholder="搜索课程" v-model="searchCourse" @keyup="filterCourses" />-->
-<!--      <ul>-->
-<!--        <li v-for="(course, index) in tempCourses" :key="index">-->
-<!--          <span>{{ course.class_name }}</span> &lt;!&ndash; 显示课程名称 &ndash;&gt;-->
-<!--          <button @click="addCourse(course)">添加课程</button>-->
-<!--        </li>-->
-<!--      </ul>-->
-<!--    </div>-->
+    <!--    <div class="course-selector">-->
+    <!--      <input type="text" placeholder="搜索课程" v-model="searchCourse" @keyup="filterCourses" />-->
+    <!--      <ul>-->
+    <!--        <li v-for="(course, index) in tempCourses" :key="index">-->
+    <!--          <span>{{ course.class_name }}</span> &lt;!&ndash; 显示课程名称 &ndash;&gt;-->
+    <!--          <button @click="addCourse(course)">添加课程</button>-->
+    <!--        </li>-->
+    <!--      </ul>-->
+    <!--    </div>-->
 
     <div class="temp-course-area">
       <h4>课程暂放区</h4>
@@ -69,14 +86,18 @@
 import axios from "axios"; // 引入 Axios 进行 HTTP 请求
 
 export default {
+  props: [
+    "taskId", // 任务ID
+    "tabData" // 传递给子组件的数据
+  ],
   data() {
     return {
       timeSlots: [], // 初始化为空数组，从后端加载数据
       schedule: [
-        { time: '1节', cells: Array(7).fill().map(() => ({ selected: false })) },
-        { time: '2节', cells: Array(7).fill().map(() => ({ selected: false })) },
-        { time: '3节', cells: Array(7).fill().map(() => ({ selected: false })) },
-        { time: '4节', cells: Array(7).fill().map(() => ({ selected: false })) },
+        {time: '1节', cells: Array(7).fill().map(() => ({selected: false}))},
+        {time: '2节', cells: Array(7).fill().map(() => ({selected: false}))},
+        {time: '3节', cells: Array(7).fill().map(() => ({selected: false}))},
+        {time: '4节', cells: Array(7).fill().map(() => ({selected: false}))},
       ],
       viewMode: "classroom",
       daysOfWeek: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
@@ -96,10 +117,11 @@ export default {
     async loadScheduleFromBackend() {
       try {
         const query = {
-          "type" : "classroom",
-          "name" : "HXGC2#201-化工分析实验室（一）"
+          "task_id": Number(this.taskId),
+          "type": "classroom",
+          "name": "HXGC2#202"
         };
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/schedule`, query,{
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/schedule`, query, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
@@ -121,6 +143,9 @@ export default {
     },
     fillSchedule() {
       // 初始化 schedule 中的每一天
+      this.schedule.forEach((row) => {
+        row.cells = Array(7).fill().map(() => ({selected: false})); // 初始化每个单元格为空对象
+      });
 
       // 填充每个时间段的课程数据
       this.timeSlots.forEach((item) => {
@@ -135,7 +160,7 @@ export default {
 
     async saveScheduleToBackend() {
       try {
-        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, { schedule: this.schedule });
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, {schedule: this.schedule});
       } catch (error) {
         console.error("保存课表失败:", error);
         alert("保存课表失败，请稍后再试");
@@ -143,7 +168,7 @@ export default {
     },
     async loadCoursesFromBackend() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/courses`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/courses`, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken')
           }
@@ -159,7 +184,7 @@ export default {
       // 自动排课
       try {
         const token = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/automated_scheduling`, null,{
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/automated_scheduling`, null, {
           headers: {
             'Authorization': 'Bearer ' + token
           }
@@ -188,30 +213,57 @@ export default {
       }
     },
     resetSchedule() {
-      this.loadScheduleFromBackend(); // 重置课表时重新加载初始数据
+      for (let rowIndex = 0; rowIndex < 4; rowIndex++) {
+        for (let colIndex = 0; colIndex < 7; colIndex++) {
+          if (this.schedule[rowIndex].cells[colIndex].id !== undefined) {
+            this.deleteCourse(rowIndex, colIndex)
+          }
+        }
+      }
     },
     setViewMode() {
       console.log("切换视角为:", this.viewMode);
       // 实现视角切换逻辑
     },
-    exportSchedule() {
-      const tableData = [];
-      this.schedule.forEach((row) => {
-        const rowData = [row.time];
-        row.cells.forEach((cell) => {
-          rowData.push(cell.class_name || "空闲");
+    async exportSchedule() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/export`, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
+            'Content-Type': 'application/json',
+          },
+          params: {
+            'file': "课程表.xlsx",
+          },
+          responseType: 'blob' // 关键配置
         });
-        tableData.push(rowData);
-      });
+        // 创建 Blob 对象并触发下载
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '课程表.xlsx'); // 设置下载文件名
+        document.body.appendChild(link);
+        link.click();
 
-      // 导出为 Excel 或 PDF 的逻辑（需引入第三方库如 SheetJS 或 jsPDF）
-      console.log("导出数据:", tableData);
+        // 清理临时对象
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        alert("课表已成功导出！");
+      } catch (error) {
+        console.error("导出失败:", error);
+        alert("导出课表失败，请稍后再试");
+      }
     },
     async deleteCourse(rowIndex, colIndex) {
       const removedCourse = this.schedule[rowIndex].cells[colIndex];
       console.log(rowIndex);
       console.log(colIndex);
       console.log("删除课程:", removedCourse);
+      if (this.schedule[rowIndex].cells[colIndex].id === undefined) {
+        alert("该单元格没有课程，无法删除");
+        return;
+      }
       if (removedCourse && removedCourse.class_name) {
         // 将课程对象及其位置信息添加到暂放区
         this.tempCourses.push(removedCourse);
@@ -244,7 +296,7 @@ export default {
         };
 
         // 发送空课程信息到后端
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/manual-schedule`, requestBody, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, requestBody, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json',
@@ -253,7 +305,7 @@ export default {
 
         if (response.status === 200) {
           console.log('课程删除成功:', response.data);
-          alert("课程已删除并保存！");
+          // alert("课程已删除并保存！");
         } else {
           console.error("课程删除失败:", response.status, response.data);
           alert("课程删除失败，请稍后再试");
@@ -295,7 +347,7 @@ export default {
         day_of_week: dayOfWeek,  // 星期几，根据选中的列来设置
         teacher_name: restoredCourse.teacher_name, // 教师名称
         class_name: restoredCourse.class_name, // 课程名称
-        class_id : restoredCourse.class_id,
+        class_id: restoredCourse.class_id,
         period: period, // 节次，从行索引获取
         classroom_name: restoredCourse.classroom_name, // 教室名称
         is_available: restoredCourse.is_available, // 是否可用
@@ -303,8 +355,9 @@ export default {
       };
 
       try {
+        console.log(this.timeSlots)
         // 发送POST请求到后端，保存课程信息
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/manual-schedule`, requestBody, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/manual-schedule`, requestBody, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('userToken') || sessionStorage.getItem('userToken'),
             'Content-Type': 'application/json'
@@ -325,55 +378,55 @@ export default {
       }
     },
     selectCell(rowIndex, colIndex) {
-  const row = this.schedule[rowIndex];
-  const cell = row.cells[colIndex];
+      const row = this.schedule[rowIndex];
+      const cell = row.cells[colIndex];
 
-  if (!cell || !cell.class_name) {
-    // 如果当前单元格没有课程
-    if (this.selectedCell && this.isSameCell(this.selectedCell, [rowIndex, colIndex])) {
-      // 如果再次点击同一个单元格，取消选中
-      this.clearSelectedCell();
-    } else {
-      // 记录新的选中单元格位置
-      this.selectedCell = [rowIndex, colIndex];
-      this.clearOtherSelections(); // 清除其他选中的单元格（可选）
-      cell.selected = true; // 设置选中状态
-    }
-    console.log("选中单元格:", rowIndex, colIndex);
-    console.log(row);
-    console.log(cell);
-  } else {
-    alert("该单元格已有课程，无法选中");
-  }
-},
+      if (!cell || !cell.class_name) {
+        // 如果当前单元格没有课程
+        if (this.selectedCell && this.isSameCell(this.selectedCell, [rowIndex, colIndex])) {
+          // 如果再次点击同一个单元格，取消选中
+          this.clearSelectedCell();
+        } else {
+          // 记录新的选中单元格位置
+          this.selectedCell = [rowIndex, colIndex];
+          this.clearOtherSelections(); // 清除其他选中的单元格（可选）
+          cell.selected = true; // 设置选中状态
+        }
+        console.log("选中单元格:", rowIndex, colIndex);
+        console.log(row);
+        console.log(cell);
+      } else {
+        alert("该单元格已有课程，无法选中");
+      }
+    },
 
 // 辅助函数：清除所有其他单元格的选中状态
-clearOtherSelections() {
-  this.schedule.forEach(row => {
-    row.cells.forEach(cell => {
-      if (cell.selected) {
-        cell.selected = false;
-      }
-    });
-  });
-},
+    clearOtherSelections() {
+      this.schedule.forEach(row => {
+        row.cells.forEach(cell => {
+          if (cell.selected) {
+            cell.selected = false;
+          }
+        });
+      });
+    },
 
 // 辅助函数：判断两个单元格是否相同
-isSameCell(cell1, cell2) {
-  return cell1[0] === cell2[0] && cell1[1] === cell2[1];
-},
+    isSameCell(cell1, cell2) {
+      return cell1[0] === cell2[0] && cell1[1] === cell2[1];
+    },
 
 // 辅助函数：清除当前选中的单元格
-clearSelectedCell() {
-  if (this.selectedCell) {
-    const [rowIndex, colIndex] = this.selectedCell;
-    const cell = this.schedule[rowIndex].cells[colIndex];
-    if (cell) {
-      cell.selected = false;
-    }
-    this.selectedCell = null;
-  }
-},
+    clearSelectedCell() {
+      if (this.selectedCell) {
+        const [rowIndex, colIndex] = this.selectedCell;
+        const cell = this.schedule[rowIndex].cells[colIndex];
+        if (cell) {
+          cell.selected = false;
+        }
+        this.selectedCell = null;
+      }
+    },
     addCourse(course) {
       if (!this.selectedCell) {
         alert("请先选择一个单元格");
@@ -397,12 +450,83 @@ clearSelectedCell() {
     },
     filterCourses() {
       this.tempCourses = this.courses.filter((course) =>
-        course.name.toLowerCase().includes(this.searchCourse.toLowerCase())
+          course.name.toLowerCase().includes(this.searchCourse.toLowerCase())
       );
     },
     isValidCourse(courseName) {
       // 示例：检查课程是否符合规则
       return !["冲突课程1", "冲突课程2"].includes(courseName);
+    },
+    // 新增搜索方法
+    async performSearch() {
+      if (!this.searchKeyword.trim()) {
+        alert('请输入搜索关键词');
+        return;
+      }
+      try {
+        const params = {
+          "type": this.searchType,
+          "name": this.searchKeyword.trim(),
+          "task_id": Number(this.taskId)
+        };
+
+        const response = await axios.post(
+            `${process.env.VUE_APP_API_BASE_URL}/api/schedule`, params,
+            {
+              headers: {
+                Authorization: 'Bearer ' +
+                    (localStorage.getItem('userToken') || sessionStorage.getItem('userToken'))
+              }
+            }
+        );
+
+        this.timeSlots = response.data.data.schedule;
+        this.fillSchedule();
+      } catch (error) {
+        console.error('搜索失败:', error);
+        alert('搜索失败，请稍后重试');
+      }
+    },
+
+    // 清除搜索
+    clearSearch() {
+      this.searchKeyword = '';
+      this.timeSlots = [];
+      this.clearHighlights();
+    },
+
+    // 结果文本格式化
+    resultText(result) {
+      if (this.searchType === 'teacher') {
+        return `${result.teacher_name} - ${result.class_name} (${result.day_of_week} 第${result.period}节)`;
+      }
+      return `${result.classroom_name} - ${result.class_name} (${result.day_of_week} 第${result.period}节)`;
+    },
+
+    // 定位高亮
+    highlightInSchedule(result) {
+      this.clearHighlights();
+
+      const dayIndex = this.daysOfWeek_En.indexOf(result.day_of_week);
+      const rowIndex = result.period - 1;
+
+      if (dayIndex !== -1 && rowIndex < this.schedule.length) {
+        const cell = this.schedule[rowIndex].cells[dayIndex];
+        cell.highlighted = true;
+        this.$nextTick(() => {
+          const element = document.querySelector(`.row:nth-child(${rowIndex + 2}) .cell:nth-child(${dayIndex + 2})`);
+          element?.scrollIntoView({behavior: 'smooth', block: 'center'});
+        });
+      }
+    },
+
+    // 清除高亮
+    clearHighlights() {
+      this.schedule.forEach(row => {
+        row.cells.forEach(cell => {
+          cell.highlighted = false;
+        });
+      });
     },
   },
   watch: {
@@ -417,6 +541,24 @@ clearSelectedCell() {
 };
 </script>
 <style scoped>
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 控制元素之间的间距 */
+  margin-bottom: 10px;
+}
+
+.search-container select,
+.search-container input[type="text"],
+.search-container button {
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+}
+.search-container button:first-of-type {
+  width: 60px; /* 搜索按钮设短 */
+}
+
 .schedule-page {
   display: flex;
   flex-direction: column;
@@ -534,49 +676,11 @@ clearSelectedCell() {
   box-shadow: inset 0 0 0 2px #4a6baf;
 }
 
+/* 选中状态样式 */
 .cell.selected {
   background-color: #e1e8ff;
   box-shadow: inset 0 0 0 2px #4a6baf;
   font-weight: bold;
-}
-
-/* 有课程的格子样式 */
-.cell[class_name] {
-  background-color: #e8f4ff;
-  color: #2c3e50;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* 空闲格子样式 */
-.cell:empty::after {
-  content: '空闲';
-  color: #95a5a6;
-  font-size: 12px;
-}
-
-.temp-course-area {
-  background-color: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.temp-course-area h4 {
-  margin-top: 0;
-  color: #4a6baf;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.temp-course-area ul {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px;
 }
 
 .temp-course-area li {
@@ -636,6 +740,20 @@ clearSelectedCell() {
   margin-left: 10px;
 }
 
+.temp-course-area ul {
+  list-style: none;
+  padding: 0;
+}
+
+.temp-course-area li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.temp-course-area button {
+  margin-right: 10px;
+}
 .task-statistics {
   margin-top: 10px;
 }

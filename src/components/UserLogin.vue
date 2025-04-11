@@ -115,7 +115,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await axios.post("http://47.97.56.13:12350/login", {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/login`, {
           username: this.username,
           password: this.password,
         });
