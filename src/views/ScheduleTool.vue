@@ -1,16 +1,21 @@
 <template>
   <div class="course-scheduler">
     <nav class="navigation-bar">
-      <button
-          v-for="(tab, index) in tabs"
-          :key="index"
-          :class="{ active: currentTab === tab, 'has-data': dataImported }"
-          @click="switchTab(tab)"
+      <button 
+        v-for="(tab, index) in tabs" 
+        :key="index" 
+        :class="{ active: currentTab === tab }" 
+        @click="switchTab(tab)"
       >
         {{ tab }}
         <span class="tab-indicator"></span>
       </button>
     </nav>
+
+    <!-- Display the current TaskId -->
+    <div class="task-id-display">
+      <p>当前任务ID: {{ taskId }}</p>
+    </div>
 
     <!-- 提示信息 -->
     <div v-if="!dataImported && (currentTab !== '数据设置')" class="data-alert">
@@ -23,20 +28,20 @@
       </div>
     </div>
 
-    <div class="tab-content">
-      <component
-          :is="currentComponent"
-          v-show="dataImported || (currentTab === '数据设置')"
-          :tab-data="tabData[currentTab]"
-          @update-data="handleUpdateData"
-      ></component>
-    </div>
-
+    <!-- 动态组件 -->
+    <component 
+      :is="currentComponent"
+      v-show="dataImported || (currentTab === '数据设置')"
+      :task-id="taskId"
+      :tab-data="tabData[currentTab]"
+      @update-data="handleUpdateData"
+    ></component>
   </div>
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import axios from 'axios'; // 引入 Axios 进行 HTTP 请求
 import DataSettings from './DataSettings.vue';
 import SchedulingConditions from './SchedulingConditions.vue';
@@ -48,6 +53,8 @@ const tabs = ['数据设置', '排课条件设置', '手动排课以及导出', 
 const currentTab = ref('数据设置');
 const dataImported = ref(true); // 数据是否已导入
 const tabData = ref({}); // 各标签页的数据
+const route = useRoute();  // 获取路由对象
+const taskId = ref(route.query.taskId || '未设置');
 
 // 动态加载组件
 const currentComponent = computed(() => {
@@ -64,8 +71,9 @@ const currentComponent = computed(() => {
 onMounted(async () => {
   try {
     const response = await axios.get('/api/course-scheduler/init'); // 获取初始数据
-    tabData.value = response.data || {};
-    dataImported.value = !!tabData.value['数据设置']; // 检查是否有数据导入
+    tabData.value = response || {};
+    // dataImported.value = !!tabData.value['数据设置']; // 检查是否有数据导入
+    dataImported.value = true; // 检查是否有数据导入
   } catch (error) {
     console.error('初始化数据失败:', error);
   }
@@ -79,21 +87,13 @@ const switchTab = async (tab) => {
   }
 
   currentTab.value = tab;
-
-  // 如果切换到新标签页，尝试加载对应数据
-  if (!tabData.value[tab]) {
-    try {
-      const response = await axios.get(`/api/course-scheduler/tab/${tab}`);
-      tabData.value[tab] = response.data || {};
-    } catch (error) {
-      console.error(`加载 ${tab} 数据失败`, error);
-    }
-  }
 };
+
+
 
 // 处理子组件数据更新
 const handleUpdateData = (newData) => {
-  tabData.value[currentTab.value] = {...tabData.value[currentTab.value], ...newData};
+  tabData.value[currentTab.value] = { ...tabData.value[currentTab.value], ...newData };
 };
 </script>
 

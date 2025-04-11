@@ -9,25 +9,17 @@
         {{ formatRuleName(key) }}
       </label>
     </div>
-
-    <!-- 添加task_id输入框 -->
-    <div class="task-id-input">
-      <label for="task-id">任务ID:</label>
-      <input type="number" id="task-id" v-model.number="rules.task_id" @change="saveRulesToBackend" />
-    </div>
-
-
-    <!-- 选择先不排的课程 -->
-    <div class="course-selection">
-      <h3>选择先不排的课程</h3>
-      <div class="button-group">
-        <button @click="showCourseSelection = true">选择课程</button>
-        <button @click="clearSelectedCourses" class="clear-button">清空</button>
-      </div>
-      <ul v-if="selectedCourses.length > 0">
-        <li v-for="(course, index) in selectedCourses" :key="index">{{ course }}</li>
-      </ul>
-    </div>
+<!--    &lt;!&ndash; 选择先不排的课程 &ndash;&gt;-->
+<!--    <div class="course-selection">-->
+<!--      <h3>选择先不排的课程</h3>-->
+<!--      <div class="button-group">-->
+<!--        <button @click="showCourseSelection = true">选择课程</button>-->
+<!--        <button @click="clearSelectedCourses" class="clear-button">清空</button>-->
+<!--      </div>-->
+<!--      <ul v-if="selectedCourses.length > 0">-->
+<!--        <li v-for="(course, index) in selectedCourses" :key="index">{{ course }}</li>-->
+<!--      </ul>-->
+<!--    </div>-->
 
     <!-- 节假日智能调课 -->
     <div class="holiday-setting">
@@ -65,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineProps } from 'vue';
 import axios from 'axios';
 
 // 假设您的token存储在localStorage中
@@ -73,7 +65,7 @@ const token = localStorage.getItem('userToken');
 
 // 创建一个axios实例，配置默认headers
 const api = axios.create({
-  baseURL: 'http://47.97.56.13:12350/api', // 假设这是您的API基础URL
+  baseURL: `${process.env.VUE_APP_API_BASE_URL}/api`, // 假设这是您的API基础URL
   headers: {
     'Authorization': `Bearer ${token}` // 在所有请求中添加token
   }
@@ -81,12 +73,11 @@ const api = axios.create({
 
 // 数据定义
 const rules = ref({
-  priority: false,
-  night: false,
-  weekend: false,
-  experiment: false,
-  PE: false,
-  task_id: ref(1), // 初始化task_id为1
+  preferential_order: false,
+  evening_classes: false,
+  weekend_classes: false,
+  experimental_class: false,
+  sports_only_afternoon: false,
 });
 
 const showCourseSelection = ref(false);
@@ -97,21 +88,29 @@ const selectedCourses = ref([]);
 const isHolidayCalendarVisible = ref(false);
 const holidays = ref([]);
 
+// 声明 Props
+const props = defineProps({
+  taskId: {
+    type: [String, Number], // 类型校验
+    required: true,         // 强制要求父组件传递
+  }
+});
+
 // 方法定义
 const formatRuleName = (key) => {
   const ruleNames = {
-    priority: '是否按优先级排课',
-    night: '晚上是否排课',
-    weekend: '周末是否排课',
-    experiment: '实验课是否能安排在晚上',
-    PE: '体育课是否只安排在下午',
+    preferential_order: '是否按优先级排课',
+    evening_classes: '晚上是否排课',
+    weekend_classes: '周末是否排课',
+    experimental_class: '实验课是否能安排在晚上',
+    sports_only_afternoon: '体育课是否只安排在下午',
   };
   return ruleNames[key] || key;
 };
 
-const clearSelectedCourses = () => {
-  selectedCourses.value = [];
-};
+// const clearSelectedCourses = () => {
+//   selectedCourses.value = [];
+// };
 
 const toggleHolidayCalendar = () => {
   isHolidayCalendarVisible.value = !isHolidayCalendarVisible.value;
@@ -130,11 +129,21 @@ const clearHolidays = () => {
   holidays.value = [];
 };
 
+const validateTaskId = () => {
+  const taskId = props.taskId;
+  if (!taskId || taskId <= 0) {
+    alert('任务ID必须为正整数');
+    return false;
+  }
+  return true;
+};
+
 // 保存所有设置的函数
 const saveAllSettings = async () => {
   try {
     // 保存规则到后端
-    const rulesToSend = { ...rules.value, task_id: Math.abs(rules.value.task_id) };
+    if (!validateTaskId()) return;
+    const rulesToSend = { ...rules.value, task_id: Number(props.taskId) };
     const rulesResponse = await api.post('/set/conditions', rulesToSend);
     console.log('规则保存成功:', rulesResponse.data);
 
@@ -142,12 +151,12 @@ const saveAllSettings = async () => {
     const coursesToSend = selectedCourses.value.map(courseName => {
       return { course_id: allCourses.value.indexOf(courseName) + 1, course_name: courseName };
     });
-    const coursesDataToSend = { courses: coursesToSend, task_id: rules.value.task_id };
+    const coursesDataToSend = { courses: coursesToSend, task_id: Number(props.taskId) };
     const coursesResponse = await api.post('/select/courses', coursesDataToSend);
     console.log('课程选择保存成功:', coursesResponse.data);
 
     // 保存节假日设置到后端
-    const holidaysDataToSend = { dates: holidays.value, task_id: rules.value.task_id };
+    const holidaysDataToSend = { dates: holidays.value, task_id: Number(props.taskId) };
     const holidaysResponse = await api.post('/set/holidays', holidaysDataToSend);
     console.log('节假日设置保存成功:', holidaysResponse.data);
 

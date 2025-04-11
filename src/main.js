@@ -7,4 +7,9 @@ import './style.css';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 
-createApp(App).use(router).use(store).use(ElementPlus).mount('#app');
+const app = createApp(App);
+app.config.globalProperties = {
+    taskId: 0,
+};
+
+app.use(router).use(store).use(ElementPlus).mount('#app');

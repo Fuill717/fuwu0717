@@ -21,7 +21,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 
 const chartImageData = ref(null);
-const APIBASEURL = 'http://47.97.56.13:12350/api';
+const APIBASEURL = `${process.env.VUE_APP_API_BASE_URL}/api`;
 // 添加一个新的响应式引用来绑定输入框的值
 const sheetName = ref('');
 

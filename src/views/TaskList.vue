@@ -11,6 +11,7 @@
       <thead>
         <tr>
           <th><input type="checkbox" v-model="selectAll"></th>
+          <th>任务ID</th>
           <th>任务名称</th>
           <th>学期</th>
           <th>修改时间</th>
@@ -20,12 +21,14 @@
       <tbody>
         <tr v-for="(task, index) in filteredTasks" :key="index">
           <td><input type="checkbox" v-model="selectedTasks" :value="task.id"></td>
+          <td>{{ task.id }}</td>
           <td>{{ task.name }}</td>
           <td>{{ task.duration }}</td>
           <td>{{ task.updatedat }}</td>
           <td>
             <button class="btn btn-blank" @click="openEditModal(task)">修改</button>
             <button class="btn btn-blank" @click="copyTask(task)">复制</button>
+            <button class="btn btn-blank" @click="selectTask(task.id)">选择</button>
           </td>
         </tr>
       </tbody>
@@ -132,7 +135,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/tasks`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -154,7 +157,7 @@ export default {
           name: this.taskName,
           duration: this.selectedSemester,
         };
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/tasks`, newTask, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, newTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -163,6 +166,14 @@ export default {
         this.closeModal();
       } catch (error) {
         console.error('新增任务失败:', error);
+      }
+    },
+    async selectTask(taskId) {
+      try {
+        this.taskId = taskId;
+        this.$router.push( {path: '/scheduleTool', query: {taskId: this.taskId} });
+      } catch (error) {
+        console.error('选择任务时出错:', error);
       }
     },
     async deleteTask() {
@@ -187,7 +198,7 @@ export default {
       }
       try {
         for (const taskId of this.selectedTasks) {
-          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/tasks/${taskId}`, {
+          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${taskId}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -219,7 +230,7 @@ export default {
         };
 
         // 发送 PUT 或 PATCH 请求更新任务
-        const response = await axios.put(`${process.env.VUE_APP_API_BASE_URL}/tasks/${this.taskId}`, updatedTask, {
+        const response = await axios.put(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${this.taskId}`, updatedTask, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -256,7 +267,7 @@ export default {
           name: newName,
           duration: baseDuration,
         };
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/tasks`, copiedTask, {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, copiedTask, {
           headers: {
             Authorization: `Bearer ${token}`
           }

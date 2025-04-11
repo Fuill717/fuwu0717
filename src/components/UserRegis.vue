@@ -89,7 +89,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await axios.post("http://47.97.56.13:12350/register", {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/register`, {
           username: this.username,
           password: this.password,
           password_confirm: this.confirmPassword,
